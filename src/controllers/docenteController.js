@@ -18,18 +18,11 @@ exports.getDashboard = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        // Cursos creados por este docente o asignados a él (si es admin o creador)
-        let misCursos = await Course.find({
-            $or: [
-                { autor: userId },
-                { autorNombre: req.user.nombre }
-            ]
-        }).sort({ creadoEn: -1 });
-
-        // Si es un docente nuevo y aún no tiene cursos asignados, mostrar todos los cursos de la plataforma como referencia
-        if (!misCursos || misCursos.length === 0) {
-            misCursos = await Course.find().limit(6);
-        }
+        // Admin ve todo; docente solo los cursos de los que es autor.
+        // No se usa `autorNombre` (dos docentes pueden llamarse igual) ni se
+        // muestran cursos ajenos cuando el docente aún no tiene cursos.
+        const filtro = req.user.rol === 'admin' ? {} : { autor: userId };
+        const misCursos = await Course.find(filtro).sort({ creadoEn: -1 });
 
         const cursoIds = misCursos.map(c => c.id);
 
@@ -291,21 +284,29 @@ exports.crearModulo = async (req, res) => {
 };
 
 /**
- * @route POST /docente/cursos/:id/modulo/:mIndex/leccion/crear
+ * @route POST /docente/cursos/:id/modulo/:moduloId/leccion/crear
  * @description Agregar lección con URL de video, explicación extendida y recursos.
  */
 exports.crearLeccion = async (req, res) => {
     try {
-        const { id, mIndex } = req.params;
+        const { id, moduloId } = req.params;
         const { titulo, duracion, videoUrl, explicacionDetallada, codigoEjemplo, lenguajeCodigo } = req.body;
 
         const curso = await Course.findOne({ id });
-        if (!curso || !curso.modulos[mIndex]) {
-            req.flash('error_msg', 'Módulo o curso no encontrado.');
-            return res.redirect(`/docente/cursos/${id}/contenido`);
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/docente/dashboard');
         }
 
-        const modulo = curso.modulos[mIndex];
+        // Busca por `_id` del submódulo y, por compatibilidad, por índice numérico.
+        let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
+        if (!modulo && /^\d+$/.test(String(moduloId))) {
+            modulo = curso.modulos[Number(moduloId)];
+        }
+        if (!modulo) {
+            req.flash('error_msg', 'Módulo no encontrado.');
+            return res.redirect(`/docente/cursos/${id}/contenido`);
+        }
         const leccionId = `${id}-${Date.now().toString().slice(-4)}`;
 
         modulo.lecciones.push({
@@ -331,18 +332,34 @@ exports.crearLeccion = async (req, res) => {
 };
 
 /**
- * @route POST /docente/cursos/:id/modulo/:mIndex/leccion/:lIndex/eliminar
+ * @route POST /docente/cursos/:id/modulo/:moduloId/leccion/:leccionId/eliminar
  * @description Eliminar una lección de un módulo.
  */
 exports.eliminarLeccion = async (req, res) => {
     try {
-        const { id, mIndex, lIndex } = req.params;
+        const { id, moduloId, leccionId } = req.params;
         const curso = await Course.findOne({ id });
 
-        if (curso && curso.modulos[mIndex] && curso.modulos[mIndex].lecciones[lIndex]) {
-            curso.modulos[mIndex].lecciones.splice(lIndex, 1);
-            await curso.save();
-            req.flash('success_msg', 'Lección eliminada.');
+        if (curso) {
+            let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
+            if (!modulo && /^\d+$/.test(String(moduloId))) {
+                modulo = curso.modulos[Number(moduloId)];
+            }
+
+            if (modulo && Array.isArray(modulo.lecciones)) {
+                let indice = modulo.lecciones.findIndex((l) =>
+                    String(l._id) === String(leccionId) || String(l.id) === String(leccionId)
+                );
+                if (indice === -1 && /^\d+$/.test(String(leccionId))) {
+                    indice = Number(leccionId);
+                }
+
+                if (indice >= 0 && indice < modulo.lecciones.length) {
+                    modulo.lecciones.splice(indice, 1);
+                    await curso.save();
+                    req.flash('success_msg', 'Lección eliminada.');
+                }
+            }
         }
 
         res.redirect(`/docente/cursos/${id}/contenido`);

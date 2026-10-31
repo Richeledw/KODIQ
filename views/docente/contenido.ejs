@@ -118,7 +118,7 @@
                                                             </p>
                                                         <% } %>
                                                     </div>
-                                                    <form action="/docente/cursos/<%= curso.id %>/modulo/<%= mIndex %>/leccion/<%= lIndex %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta lección?')">
+                                                    <form action="/docente/cursos/<%= curso.id %>/modulo/<%= modulo._id %>/leccion/<%= lec._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta lección?')">
                                                         <button class="btn btn-sm btn-outline-danger" title="Eliminar lección">
                                                             <i class="fas fa-trash-alt"></i>
                                                         </button>
@@ -139,7 +139,7 @@
                             <div class="modal fade" id="modalCrearLeccion<%= mIndex %>" tabindex="-1">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
-                                        <form action="/docente/cursos/<%= curso.id %>/modulo/<%= mIndex %>/leccion/crear" method="POST">
+                                        <form action="/docente/cursos/<%= curso.id %>/modulo/<%= modulo._id %>/leccion/crear" method="POST">
                                             <div class="modal-header">
                                                 <h5 class="modal-title fw-bold">Añadir Lección a: <%= modulo.titulo %></h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

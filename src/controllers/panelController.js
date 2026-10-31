@@ -9,6 +9,7 @@ const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
 const StudentProject = require('../models/StudentProject');
 const staticCursos = require('../models/cursosData');
+const progressService = require('../services/progressService');
 const path = require('path');
 const fs = require('fs');
 
@@ -20,36 +21,61 @@ const fs = require('fs');
 exports.getPanel = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/login');
+        }
+
         const allDbCourses = await Course.find();
 
         // Mapear cursos en un diccionario rápido por ID
         const cursosDict = {};
         allDbCourses.forEach(c => {
-            cursosDict[c.id] = c.toObject();
+            cursosDict[c.id] = c;
         });
 
         // Combinar con estáticos si alguno no está en BD
         Object.keys(staticCursos).forEach(id => {
             if (!cursosDict[id]) {
-                cursosDict[id] = { id, ...staticCursos[id] };
+                cursosDict[id] = { id, ...staticCursos[id], modulos: [] };
             }
         });
 
-        // Mapear cursos inscritos del estudiante
-        const cursosInscritos = (user.cursosInscritos || []).map(ci => {
-            const infoCurso = cursosDict[ci.cursoId] || {
-                id: ci.cursoId,
-                titulo: ci.cursoId.toUpperCase(),
+        // Migración perezosa: si el estudiante solo tiene el registro legado
+        // en User.cursosInscritos, se crea su Enrollment al abrir el panel.
+        for (const ci of (user.cursosInscritos || [])) {
+            const curso = cursosDict[ci.cursoId] || { id: ci.cursoId, modulos: [] };
+            await progressService.obtenerInscripcion(user._id, curso);
+        }
+
+        // Enrollment es la fuente de verdad del progreso.
+        const inscripciones = await Enrollment.find({ estudiante: user._id })
+            .sort({ fechaInscripcion: -1 });
+
+        const cursosInscritos = inscripciones.map((ins) => {
+            const infoCurso = cursosDict[ins.cursoId] || {
+                id: ins.cursoId,
+                titulo: ins.cursoId.toUpperCase(),
                 descripcion: 'Curso de la plataforma',
                 icono: '/img/html5.svg',
-                duracion: '10 horas'
+                duracion: '10 horas',
+                modulos: []
             };
 
+            const lecciones = progressService.obtenerLecciones(infoCurso);
+            const completadas = progressService.normalizarCompletadas(
+                infoCurso,
+                ins.leccionesCompletadas
+            );
+            const progreso = lecciones.length > 0
+                ? progressService.calcularProgreso(lecciones.length, completadas.length)
+                : Math.min(100, Math.max(0, Number(ins.progreso) || 0));
+
             return {
-                ...infoCurso,
-                progreso: ci.progreso || 0,
-                leccionesCompletadasCount: (ci.leccionesCompletadas || []).length,
-                fechaInscripcion: ci.fechaInscripcion
+                ...(typeof infoCurso.toObject === 'function' ? infoCurso.toObject() : infoCurso),
+                progreso,
+                leccionesCompletadasCount: completadas.length,
+                fechaInscripcion: ins.fechaInscripcion
             };
         });
 
@@ -211,6 +237,29 @@ exports.postCambiarPassword = async (req, res) => {
 exports.postEliminarCuenta = async (req, res) => {
     try {
         const userId = req.user.id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/login');
+        }
+
+        // No permitir que la plataforma se quede sin administradores activos.
+        if (user.rol === 'admin' && user.activo) {
+            const otrosAdmins = await User.countDocuments({
+                rol: 'admin',
+                activo: true,
+                _id: { $ne: user._id }
+            });
+            if (otrosAdmins === 0) {
+                req.flash('error_msg', 'No puedes eliminar al último administrador activo de la plataforma.');
+                return res.redirect('/configuracion');
+            }
+        }
+
+        // Limpiar datos asociados para no dejar registros huérfanos.
+        await Enrollment.deleteMany({ estudiante: userId });
+        await StudentProject.deleteMany({ estudiante: userId });
         await User.findByIdAndDelete(userId);
 
         if (typeof req.logout === 'function') {

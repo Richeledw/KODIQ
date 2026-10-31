@@ -990,7 +990,7 @@
                     };
 
                     try {
-                        const res = await fetch('/curso/<%= curso.id %>/modulo/0/quiz/evaluar', {
+                        const res = await fetch('/curso/<%= curso.id %>/modulo/<%= leccionActiva && leccionActiva.moduloId ? leccionActiva.moduloId : (curso.modulos[0] && curso.modulos[0]._id) %>/quiz/evaluar', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                             body: JSON.stringify({ respuestas })

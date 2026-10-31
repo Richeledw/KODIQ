@@ -37,6 +37,6 @@ router.post('/api/progreso/completar', isAuth, cursoController.postCompletarProg
 router.get('/curso/:id/certificado', isAuth, cursoController.getCertificado);
 
 // Evaluación interactiva de quiz por módulo
-router.post('/curso/:id/modulo/:mIndex/quiz/evaluar', isAuth, cursoController.postEvaluarQuiz);
+router.post('/curso/:id/modulo/:moduloId/quiz/evaluar', isAuth, cursoController.postEvaluarQuiz);
 
 module.exports = router;

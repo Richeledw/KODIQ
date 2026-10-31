@@ -116,7 +116,7 @@
                                                                 </small>
                                                             <% } %>
                                                         </div>
-                                                        <form action="/admin/cursos/<%= curso.id %>/modulo/<%= mIdx %>/leccion/<%= lIdx %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta lección?');">
+                                                        <form action="/admin/cursos/<%= curso.id %>/modulo/<%= mod._id %>/leccion/<%= lec._id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta lección?');">
                                                             <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Eliminar lección">
                                                                 <i class="fas fa-trash-alt"></i>
                                                             </button>
@@ -138,7 +138,7 @@
                                                 <h5 class="modal-title fw-bold text-dark"><i class="fas fa-plus-circle text-primary me-2"></i>Nueva Lección en "<%= mod.titulo %>"</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
-                                            <form action="/admin/cursos/<%= curso.id %>/modulo/<%= mIdx %>/leccion/crear" method="POST">
+                                            <form action="/admin/cursos/<%= curso.id %>/modulo/<%= mod._id %>/leccion/crear" method="POST">
                                                 <div class="modal-body">
                                                     <div class="row g-3">
                                                         <div class="col-md-8">

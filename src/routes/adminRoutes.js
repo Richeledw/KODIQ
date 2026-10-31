@@ -41,8 +41,8 @@ router.post('/admin/cursos/:id/eliminar', adminController.eliminarCurso);
 // ── Gestión de Contenido y Recursos ──
 router.get('/admin/cursos/:id/contenido', adminController.getContenidoCurso);
 router.post('/admin/cursos/:id/modulo/crear', validarModulo, adminController.crearModulo);
-router.post('/admin/cursos/:id/modulo/:mIndex/leccion/crear', validarLeccion, adminController.crearLeccion);
-router.post('/admin/cursos/:id/modulo/:mIndex/leccion/:lIndex/eliminar', adminController.eliminarLeccion);
+router.post('/admin/cursos/:id/modulo/:moduloId/leccion/crear', validarLeccion, adminController.crearLeccion);
+router.post('/admin/cursos/:id/modulo/:moduloId/leccion/:leccionId/eliminar', adminController.eliminarLeccion);
 router.post('/admin/cursos/:id/recurso/crear', validarRecurso, adminController.crearRecurso);
 router.post('/admin/cursos/:id/recurso/:rId/eliminar', adminController.eliminarRecurso);
 

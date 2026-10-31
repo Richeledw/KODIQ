@@ -500,21 +500,29 @@ exports.crearModulo = async (req, res) => {
 };
 
 /**
- * @route POST /admin/cursos/:id/modulo/:mIndex/leccion/crear
+ * @route POST /admin/cursos/:id/modulo/:moduloId/leccion/crear
  * @description Agregar una lección a un módulo con URL de video, explicación y código.
  */
 exports.crearLeccion = async (req, res) => {
     try {
-        const { id, mIndex } = req.params;
+        const { id, moduloId } = req.params;
         const { titulo, duracion, videoUrl, explicacionDetallada, codigoEjemplo, lenguajeCodigo } = req.body;
 
         const curso = await Course.findOne({ id });
-        if (!curso || !curso.modulos[mIndex]) {
-            req.flash('error_msg', 'Módulo o curso no encontrado.');
-            return res.redirect(`/admin/cursos/${id}/contenido`);
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/admin/cursos');
         }
 
-        const modulo = curso.modulos[mIndex];
+        // Busca por `_id` del submódulo y, por compatibilidad, por índice numérico.
+        let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
+        if (!modulo && /^\d+$/.test(String(moduloId))) {
+            modulo = curso.modulos[Number(moduloId)];
+        }
+        if (!modulo) {
+            req.flash('error_msg', 'Módulo no encontrado.');
+            return res.redirect(`/admin/cursos/${id}/contenido`);
+        }
         const leccionId = `${id}-${Date.now().toString().slice(-4)}`;
 
         modulo.lecciones.push({
@@ -540,18 +548,34 @@ exports.crearLeccion = async (req, res) => {
 };
 
 /**
- * @route POST /admin/cursos/:id/modulo/:mIndex/leccion/:lIndex/eliminar
+ * @route POST /admin/cursos/:id/modulo/:moduloId/leccion/:leccionId/eliminar
  * @description Eliminar una lección de un módulo.
  */
 exports.eliminarLeccion = async (req, res) => {
     try {
-        const { id, mIndex, lIndex } = req.params;
+        const { id, moduloId, leccionId } = req.params;
         const curso = await Course.findOne({ id });
 
-        if (curso && curso.modulos[mIndex] && curso.modulos[mIndex].lecciones[lIndex]) {
-            curso.modulos[mIndex].lecciones.splice(lIndex, 1);
-            await curso.save();
-            req.flash('success_msg', 'Lección eliminada.');
+        if (curso) {
+            let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
+            if (!modulo && /^\d+$/.test(String(moduloId))) {
+                modulo = curso.modulos[Number(moduloId)];
+            }
+
+            if (modulo && Array.isArray(modulo.lecciones)) {
+                let indice = modulo.lecciones.findIndex((l) =>
+                    String(l._id) === String(leccionId) || String(l.id) === String(leccionId)
+                );
+                if (indice === -1 && /^\d+$/.test(String(leccionId))) {
+                    indice = Number(leccionId);
+                }
+
+                if (indice >= 0 && indice < modulo.lecciones.length) {
+                    modulo.lecciones.splice(indice, 1);
+                    await curso.save();
+                    req.flash('success_msg', 'Lección eliminada.');
+                }
+            }
         }
 
         res.redirect(`/admin/cursos/${id}/contenido`);

@@ -9,6 +9,7 @@ const User = require('../models/User');
 const Enrollment = require('../models/Enrollment');
 const StudentProject = require('../models/StudentProject');
 const staticCursos = require('../models/cursosData');
+const progressService = require('../services/progressService');
 const crypto = require('crypto');
 
 /**
@@ -27,10 +28,8 @@ exports.getTemas = async (req, res) => {
         // Obtener IDs de cursos en los que el usuario ya está inscrito (si está logueado)
         let inscritosIds = [];
         if (req.user) {
-            const user = await User.findById(req.user.id).select('cursosInscritos');
-            if (user && user.cursosInscritos) {
-                inscritosIds = user.cursosInscritos.map(c => c.cursoId);
-            }
+            const inscripciones = await Enrollment.find({ estudiante: req.user.id }).select('cursoId');
+            inscritosIds = inscripciones.map(i => i.cursoId);
         }
 
         res.render('temas', {
@@ -83,13 +82,10 @@ exports.getCurso = async (req, res) => {
         let progresoInscripcion = 0;
 
         if (req.user) {
-            const user = await User.findById(req.user.id);
-            if (user && user.cursosInscritos) {
-                const ins = user.cursosInscritos.find(c => c.cursoId === id);
-                if (ins) {
-                    estaInscrito = true;
-                    progresoInscripcion = ins.progreso || 0;
-                }
+            const inscripcion = await progressService.obtenerInscripcion(req.user.id, curso);
+            if (inscripcion) {
+                estaInscrito = true;
+                progresoInscripcion = inscripcion.progreso || 0;
             }
         }
 
@@ -130,30 +126,18 @@ exports.postInscribir = async (req, res) => {
         }
 
         const user = await User.findById(req.user.id);
-        const yaInscrito = user.cursosInscritos.some(c => c.cursoId === id);
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/login');
+        }
 
-        if (!yaInscrito) {
-            // Agregar al perfil del usuario
-            user.cursosInscritos.push({
-                cursoId: id,
-                fechaInscripcion: new Date(),
-                leccionesCompletadas: [],
-                progreso: 0
-            });
-            await user.save();
+        // `obtenerInscripcion` migra de forma perezosa el registro legado si existe.
+        const inscripcionPrevia = await progressService.obtenerInscripcion(user._id, curso);
 
-            // Crear o sincronizar en el modelo Enrollment
-            await Enrollment.findOneAndUpdate(
-                { estudiante: user._id, cursoId: id },
-                {
-                    estudiante: user._id,
-                    curso: curso._id,
-                    cursoId: id,
-                    fechaInscripcion: new Date(),
-                    progreso: 0
-                },
-                { upsert: true, new: true }
-            );
+        if (!inscripcionPrevia) {
+            // Inscripción explícita: Enrollment es la fuente de verdad y se
+            // mantiene el espejo legado en User.cursosInscritos.
+            await progressService.crearInscripcion(user, curso);
 
             // Inicializar el espacio del proyecto práctico del estudiante para este curso
             const proyectoExistente = await StudentProject.findOne({ estudiante: user._id, cursoId: id });
@@ -203,43 +187,37 @@ exports.getAulaVirtual = async (req, res) => {
         }
 
         const user = await User.findById(req.user.id);
-        let inscripcion = user.cursosInscritos.find(c => c.cursoId === id);
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/login');
+        }
 
-        // Si por alguna razón no estuviera inscrito, auto-inscribirlo
+        // Inscripción explícita: el aula no crea matrículas por su cuenta.
+        const inscripcion = await progressService.obtenerInscripcion(user._id, curso);
         if (!inscripcion) {
-            user.cursosInscritos.push({
-                cursoId: id,
-                fechaInscripcion: new Date(),
-                leccionesCompletadas: [],
-                progreso: 0
-            });
-            await user.save();
-            inscripcion = user.cursosInscritos.find(c => c.cursoId === id);
+            req.flash('error_msg', 'Debes inscribirte en el curso antes de entrar al aula virtual.');
+            return res.redirect(`/curso/${id}`);
         }
 
-        // Aplanar todas las lecciones de todos los módulos para navegación secuencial
-        const todasLasLecciones = [];
-        if (curso.modulos && curso.modulos.length > 0) {
-            curso.modulos.forEach(modulo => {
-                if (modulo.lecciones && modulo.lecciones.length > 0) {
-                    modulo.lecciones.forEach(lec => {
-                        todasLasLecciones.push({
-                            ...lec.toObject ? lec.toObject() : lec,
-                            moduloTitulo: modulo.titulo
-                        });
-                    });
-                }
-            });
-        }
+        // Aplanar todas las lecciones con su módulo para navegación secuencial.
+        const todasLasLecciones = progressService.obtenerLecciones(curso);
+        const leccionesCompletadas = progressService.normalizarCompletadas(
+            curso,
+            inscripcion.leccionesCompletadas
+        );
 
-        // Determinar la lección activa
+        // Determinar la lección activa (acepta slug `id` o `_id`).
         let leccionActiva = null;
         if (leccionId) {
-            leccionActiva = todasLasLecciones.find(l => l.id === leccionId);
+            leccionActiva = todasLasLecciones.find((l) =>
+                String(l.id) === String(leccionId) || String(l._id) === String(leccionId)
+            );
         }
         if (!leccionActiva && todasLasLecciones.length > 0) {
             // Por defecto, la primera lección no completada, o la primera del curso
-            const primeraIncompleta = todasLasLecciones.find(l => !inscripcion.leccionesCompletadas.includes(l.id));
+            const primeraIncompleta = todasLasLecciones.find(
+                (l) => !leccionesCompletadas.includes(progressService.claveLeccion(l))
+            );
             leccionActiva = primeraIncompleta || todasLasLecciones[0];
         }
 
@@ -247,7 +225,9 @@ exports.getAulaVirtual = async (req, res) => {
         let leccionAnterior = null;
         let leccionSiguiente = null;
         if (leccionActiva) {
-            const index = todasLasLecciones.findIndex(l => l.id === leccionActiva.id);
+            const index = todasLasLecciones.findIndex(
+                (l) => progressService.claveLeccion(l) === progressService.claveLeccion(leccionActiva)
+            );
             if (index > 0) leccionAnterior = todasLasLecciones[index - 1];
             if (index < todasLasLecciones.length - 1) leccionSiguiente = todasLasLecciones[index + 1];
         }
@@ -268,12 +248,11 @@ exports.getAulaVirtual = async (req, res) => {
             });
         }
 
-        // Calcular porcentaje real de progreso
-        const totalLecciones = todasLasLecciones.length;
-        const leccionesCompletadasCount = inscripcion.leccionesCompletadas.length;
-        const porcentajeProgreso = totalLecciones > 0 
-            ? Math.round((leccionesCompletadasCount / totalLecciones) * 100)
-            : 0;
+        // Porcentaje real calculado solo con lecciones existentes.
+        const porcentajeProgreso = progressService.calcularProgreso(
+            todasLasLecciones.length,
+            leccionesCompletadas.length
+        );
 
         res.render('aula', {
             titlePage: `Aula Virtual - ${curso.titulo}`,
@@ -282,7 +261,7 @@ exports.getAulaVirtual = async (req, res) => {
             leccionActiva,
             leccionAnterior,
             leccionSiguiente,
-            leccionesCompletadas: inscripcion.leccionesCompletadas,
+            leccionesCompletadas,
             porcentajeProgreso,
             proyecto
         });
@@ -304,66 +283,61 @@ exports.postCompletarLeccion = async (req, res) => {
     }
 
     const { id, leccionId } = req.params;
+    const esperaJson = Boolean(req.xhr || req.headers.accept?.includes('json'));
 
     try {
-        const user = await User.findById(req.user.id);
         const curso = await Course.findOne({ id });
-
-        let inscripcion = user.cursosInscritos.find(c => c.cursoId === id);
-        if (!inscripcion) {
-            user.cursosInscritos.push({
-                cursoId: id,
-                fechaInscripcion: new Date(),
-                leccionesCompletadas: [],
-                progreso: 0
-            });
-            inscripcion = user.cursosInscritos.find(c => c.cursoId === id);
+        if (!curso) {
+            if (esperaJson) return res.status(404).json({ success: false, msg: 'Curso no encontrado' });
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/temas');
         }
 
-        const yaCompletada = inscripcion.leccionesCompletadas.includes(leccionId);
-        if (yaCompletada) {
-            // Desmarcar
-            inscripcion.leccionesCompletadas = inscripcion.leccionesCompletadas.filter(lid => lid !== leccionId);
-        } else {
-            // Marcar completada
-            inscripcion.leccionesCompletadas.push(leccionId);
+        const lecciones = progressService.obtenerLecciones(curso);
+        if (lecciones.length === 0) {
+            if (esperaJson) return res.status(400).json({ success: false, msg: 'El curso no tiene lecciones' });
+            req.flash('error_msg', 'Este curso todavía no tiene lecciones.');
+            return res.redirect(`/curso/${id}`);
         }
 
-        // Calcular total de lecciones del curso
-        let totalLecciones = 0;
-        if (curso && curso.modulos) {
-            curso.modulos.forEach(m => {
-                if (m.lecciones) totalLecciones += m.lecciones.length;
-            });
-        }
-        if (totalLecciones === 0) totalLecciones = 1;
-
-        const nuevoProgreso = Math.round((inscripcion.leccionesCompletadas.length / totalLecciones) * 100);
-        inscripcion.progreso = Math.min(100, nuevoProgreso);
-
-        await user.save();
-
-        // Sincronizar en Enrollment
-        await Enrollment.findOneAndUpdate(
-            { estudiante: user._id, cursoId: id },
-            {
-                leccionesCompletadas: inscripcion.leccionesCompletadas,
-                progreso: inscripcion.progreso,
-                ultimoAcceso: new Date()
-            }
+        // Validar que la lección exista (acepta slug `id` o `_id`).
+        const leccion = lecciones.find((l) =>
+            String(l.id) === String(leccionId) || String(l._id) === String(leccionId)
         );
+        if (!leccion) {
+            if (esperaJson) return res.status(404).json({ success: false, msg: 'Lección no encontrada' });
+            req.flash('error_msg', 'La lección indicada no existe en este curso.');
+            return res.redirect(`/curso/${id}/aula`);
+        }
 
-        if (req.xhr || req.headers.accept?.includes('json')) {
+        const clave = progressService.claveLeccion(leccion);
+        const inscripcion = await progressService.obtenerInscripcion(req.user.id, curso);
+        if (!inscripcion) {
+            if (esperaJson) return res.status(403).json({ success: false, msg: 'No estás inscrito en este curso' });
+            req.flash('error_msg', 'Debes inscribirte en el curso antes de registrar progreso.');
+            return res.redirect(`/curso/${id}`);
+        }
+
+        const completadas = progressService.normalizarCompletadas(curso, inscripcion.leccionesCompletadas);
+        const yaCompletada = completadas.includes(clave);
+        const nuevas = yaCompletada
+            ? completadas.filter((c) => c !== clave)
+            : [...completadas, clave];
+
+        const resultado = await progressService.guardarProgreso(req.user.id, curso, nuevas);
+
+        if (esperaJson) {
             return res.json({
                 success: true,
                 completada: !yaCompletada,
-                progreso: inscripcion.progreso,
-                leccionesCompletadasCount: inscripcion.leccionesCompletadas.length
+                progreso: resultado.progreso,
+                leccionesCompletadasCount: resultado.completadas.length,
+                totalLecciones: resultado.total
             });
         }
 
         req.flash('success_msg', yaCompletada ? 'Lección desmarcada.' : '¡Lección completada!');
-        res.redirect(`/curso/${id}/aula/${leccionId}`);
+        res.redirect(`/curso/${id}/aula/${clave}`);
 
     } catch (err) {
         console.error('Error al completar lección:', err);
@@ -390,9 +364,25 @@ exports.postGuardarProyecto = async (req, res) => {
     try {
         const user = req.user;
         const curso = await Course.findOne({ id });
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/temas');
+        }
 
-        // Blindaje RBAC: El estudiante solo puede marcar 'En Progreso' o 'En Revisión'. 'Completado' requiere calificación docente/admin.
-        const estadoPermitido = (estado === 'En Revisión') ? 'En Revisión' : 'En Progreso';
+        const inscripcion = await progressService.obtenerInscripcion(user._id, curso);
+        if (!inscripcion) {
+            req.flash('error_msg', 'Debes inscribirte en el curso antes de guardar un proyecto.');
+            return res.redirect(`/curso/${id}`);
+        }
+
+        const proyectoExistente = await StudentProject.findOne({ estudiante: user._id, cursoId: id });
+
+        // Blindaje RBAC: el estudiante solo puede marcar 'En Progreso' o
+        // 'En Revisión'. Un proyecto ya aprobado no puede volver atrás.
+        let estadoPermitido = (estado === 'En Revisión') ? 'En Revisión' : 'En Progreso';
+        if (proyectoExistente && proyectoExistente.estado === 'Completado') {
+            estadoPermitido = 'Completado';
+        }
 
         const proyecto = await StudentProject.findOneAndUpdate(
             { estudiante: user._id, cursoId: id },
@@ -401,8 +391,8 @@ exports.postGuardarProyecto = async (req, res) => {
                 estudianteNombre: user.nombre,
                 estudianteEmail: user.email,
                 cursoId: id,
-                cursoTitulo: curso ? curso.titulo : id,
-                titulo: titulo || 'Mi Proyecto Práctico',
+                cursoTitulo: curso.titulo,
+                titulo: titulo || (proyectoExistente && proyectoExistente.titulo) || 'Mi Proyecto Práctico',
                 descripcion: descripcion || '',
                 notasAvance: notasAvance || '',
                 repositorioUrl: repositorioUrl || '',
@@ -456,24 +446,23 @@ exports.getCertificado = async (req, res) => {
         }
 
         const user = await User.findById(req.user.id);
-        const inscripcion = user.cursosInscritos.find(c => c.cursoId === id);
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/login');
+        }
 
+        const inscripcion = await progressService.obtenerInscripcion(user._id, curso);
         if (!inscripcion) {
             req.flash('error_msg', 'No estás inscrito en este curso.');
             return res.redirect(`/curso/${id}`);
         }
 
-        // 1. Validar que las lecciones estén al 100%
-        let totalLecciones = 0;
-        if (curso.modulos && curso.modulos.length > 0) {
-            curso.modulos.forEach(m => {
-                if (m.lecciones) totalLecciones += m.lecciones.length;
-            });
-        }
-        if (totalLecciones === 0) totalLecciones = 1;
-
-        const leccionesCompletadasCount = (inscripcion.leccionesCompletadas || []).length;
-        const leccionesAl100 = leccionesCompletadasCount >= totalLecciones || (inscripcion.progreso || 0) === 100;
+        // 1. Validar el 100 % real: todas las lecciones existentes deben estar
+        // completadas. No se confía en el campo `progreso` ni en IDs antiguos.
+        const leccionesAl100 = progressService.estaCompleto(
+            curso,
+            inscripcion.leccionesCompletadas
+        );
 
         // 2. Validar que el proyecto práctico esté evaluado y aprobado por docente o admin
         const proyecto = await StudentProject.findOne({
@@ -509,20 +498,28 @@ exports.getCertificado = async (req, res) => {
 };
 
 /**
- * @route POST /curso/:id/modulo/:mIndex/quiz/evaluar
+ * @route POST /curso/:id/modulo/:moduloId/quiz/evaluar
  * @description Evalúa interactivamente las respuestas del cuestionario de un módulo y devuelve retroalimentación inmediata.
  */
 exports.postEvaluarQuiz = async (req, res) => {
     try {
-        const { id, mIndex } = req.params;
+        const { id, moduloId } = req.params;
         const { respuestas } = req.body;
 
         const curso = await Course.findOne({ id });
-        if (!curso || !curso.modulos || !curso.modulos[mIndex]) {
+        if (!curso || !Array.isArray(curso.modulos) || curso.modulos.length === 0) {
             return res.status(404).json({ success: false, msg: 'Módulo no encontrado.' });
         }
 
-        const modulo = curso.modulos[mIndex];
+        // Acepta `_id` del módulo y, por compatibilidad, el índice numérico.
+        let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
+        if (!modulo && /^\d+$/.test(String(moduloId))) {
+            modulo = curso.modulos[Number(moduloId)];
+        }
+        if (!modulo) {
+            return res.status(404).json({ success: false, msg: 'Módulo no encontrado.' });
+        }
+
         let quizPreguntas = modulo.quiz;
 
         if (!quizPreguntas || quizPreguntas.length === 0) {

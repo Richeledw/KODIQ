@@ -104,7 +104,12 @@ exports.getConfiguracion = async (req, res) => {
  */
 exports.postActualizarPerfil = async (req, res) => {
     try {
-        const { nombre, email, telefono, ciudad, bio } = req.body;
+        // SEGURIDAD: normalizamos y forzamos string en todos los campos editables.
+        const nombre = String(req.body.nombre || '').trim();
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const telefono = String(req.body.telefono || '').trim();
+        const ciudad = String(req.body.ciudad || '').trim();
+        const bio = String(req.body.bio || '').trim();
         const user = await User.findById(req.user.id);
 
         if (!user) {
@@ -112,24 +117,25 @@ exports.postActualizarPerfil = async (req, res) => {
             return res.redirect('/configuracion');
         }
 
-        if (!nombre || !nombre.trim()) {
+        if (!nombre) {
             req.flash('error_msg', 'El nombre es obligatorio.');
             return res.redirect('/configuracion');
         }
 
-        if (email && email.trim() !== user.email) {
-            const emailExiste = await User.findOne({ email: email.trim().toLowerCase(), _id: { $ne: user._id } });
+        if (email && email !== user.email) {
+            const emailExiste = await User.findOne({ email, _id: { $ne: user._id } })
+                .collation({ locale: 'en', strength: 2 });
             if (emailExiste) {
                 req.flash('error_msg', 'Ese correo electrónico ya está registrado por otra cuenta.');
                 return res.redirect('/configuracion');
             }
-            user.email = email.trim().toLowerCase();
+            user.email = email;
         }
 
-        user.nombre = nombre.trim();
-        user.telefono = (telefono || '').trim();
-        user.ciudad = (ciudad || '').trim();
-        user.bio = (bio || '').trim();
+        user.nombre = nombre;
+        user.telefono = telefono;
+        user.ciudad = ciudad;
+        user.bio = bio;
 
         await user.save();
 
@@ -154,15 +160,18 @@ exports.postActualizarPerfil = async (req, res) => {
  */
 exports.postCambiarPassword = async (req, res) => {
     try {
-        const { passwordActual, passwordNueva, passwordConfirmar } = req.body;
+        // SEGURIDAD: forzamos string y exigimos mínimo 8 caracteres en contraseñas nuevas.
+        const passwordActual = String(req.body.passwordActual || '');
+        const passwordNueva = String(req.body.passwordNueva || '');
+        const passwordConfirmar = String(req.body.passwordConfirmar || '');
 
         if (!passwordActual || !passwordNueva || !passwordConfirmar) {
             req.flash('error_msg', 'Por favor completa todos los campos de contraseña.');
             return res.redirect('/configuracion');
         }
 
-        if (passwordNueva.length < 6) {
-            req.flash('error_msg', 'La nueva contraseña debe tener al menos 6 caracteres.');
+        if (passwordNueva.length < 8) {
+            req.flash('error_msg', 'La nueva contraseña debe tener al menos 8 caracteres.');
             return res.redirect('/configuracion');
         }
 

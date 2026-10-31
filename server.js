@@ -12,6 +12,9 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo').default; // Gestor de persistencia de sesiones en MongoDB
 const flash = require('connect-flash');       // Para enviar mensajes informativos temporales entre redirecciones
 const dotenv = require('dotenv');
+const helmet = require('helmet');             // Cabeceras de seguridad (CSP, HSTS, nosniff, etc.)
+const compression = require('compression');   // Compresión gzip de las respuestas
+const mongoSanitize = require('express-mongo-sanitize'); // Anti NoSQL injection ($ y . en claves)
 
 // Cargar variables de entorno del archivo .env
 dotenv.config();
@@ -29,6 +32,46 @@ const connectDB = require('./src/config/db');
 // Inicializar la aplicación Express
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// SEGURIDAD: detrás de un proxy (Render, Heroku, Nginx) confiamos en el primer salto
+// para que req.ip y las cookies secure funcionen correctamente.
+if (isProduction) {
+    app.set('trust proxy', 1);
+}
+
+// SEGURIDAD: cabeceras HTTP seguras.
+// TODO(seguridad): migrar los scripts inline a archivos y usar nonces para eliminar
+// 'unsafe-inline' de script-src. Se mantiene temporalmente para no romper las vistas.
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
+            styleSrcAttr: ["'unsafe-inline'"],
+            fontSrc: ["'self'", 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com', 'data:'],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'"],
+            frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
+            mediaSrc: ["'self'", 'https:'],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            frameAncestors: ["'self'"],
+            workerSrc: ["'self'", 'blob:'],
+            manifestSrc: ["'self'"],
+            // En desarrollo no forzamos HTTPS; en producción sí.
+            upgradeInsecureRequests: isProduction ? [] : null
+        }
+    },
+    // Algunos recursos de CDN no envían CORP; no bloqueamos su carga.
+    crossOriginEmbedderPolicy: false
+}));
+
+// Comprimir respuestas de texto para reducir el ancho de banda.
+app.use(compression());
 
 // Configurar estrategias de Passport para el manejo de sesiones de usuario
 require('./src/config/passport')(passport);
@@ -66,8 +109,12 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// SEGURIDAD: elimina claves con $ o . en body/params/query para evitar NoSQL injection.
+app.use(mongoSanitize({ replaceWith: '_' }));
+
 // Configuración de Sesiones con almacenamiento persistente en MongoDB (7 días)
 app.use(session({
+    name: 'eduplat.sid', // Nombre propio: evita colisiones con otras apps en el mismo host
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -75,7 +122,9 @@ app.use(session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días de persistencia de sesión
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: 'lax',
+        // SEGURIDAD: solo se envía por HTTPS en producción (requiere trust proxy).
+        secure: isProduction
     }
 }));
 
@@ -94,6 +143,8 @@ app.use((req, res, next) => {
     res.locals.success_msg = req.flash ? req.flash('success_msg') : null;
     res.locals.error_msg = req.flash ? req.flash('error_msg') : null;
     res.locals.error = req.flash ? req.flash('error') : null; // Errores generados internamente por Passport
+    // Enlace de vista previa de Ethereal (solo desarrollo). Se escapa en la vista.
+    res.locals.reset_preview_url = req.flash ? (req.flash('reset_preview_url')[0] || null) : null;
     next();
 });
 

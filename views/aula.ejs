@@ -897,10 +897,14 @@
                     const rawCmd = terminalInput.value.trim();
                     if (!rawCmd) return;
 
-                    // Imprimir línea de comando
+                    // Imprimir línea de comando (sin innerHTML: el comando es entrada del usuario)
                     const cmdLine = document.createElement('div');
                     cmdLine.className = 'terminal-line';
-                    cmdLine.innerHTML = `<span class="terminal-prompt">$</span> ${rawCmd}`;
+                    const promptSpan = document.createElement('span');
+                    promptSpan.className = 'terminal-prompt';
+                    promptSpan.textContent = '$';
+                    cmdLine.appendChild(promptSpan);
+                    cmdLine.appendChild(document.createTextNode(` ${rawCmd}`));
                     terminalOutput.appendChild(cmdLine);
 
                     terminalInput.value = '';
@@ -958,7 +962,11 @@
                             <span class="text-success">nothing to commit, working tree clean</span>
                         `;
                     } else {
-                        responseLine.innerHTML = `<span class="text-danger">Comando no reconocido: '${rawCmd}'. Escribe 'help' para ver la lista.</span>`;
+                        // SEGURIDAD: el comando se inserta con textContent, nunca con innerHTML.
+                        const errorSpan = document.createElement('span');
+                        errorSpan.className = 'text-danger';
+                        errorSpan.textContent = `Comando no reconocido: '${rawCmd}'. Escribe 'help' para ver la lista.`;
+                        responseLine.appendChild(errorSpan);
                     }
 
                     terminalOutput.appendChild(responseLine);
@@ -1019,20 +1027,33 @@
 
                             msgEl.textContent = data.mensaje;
 
-                            let feedbackHtml = '<div class="mt-3">';
+                            // Construimos el feedback con nodos DOM (textContent) para evitar XSS
+                            // si el contenido del quiz viniera con HTML malicioso.
+                            const feedbackWrap = document.createElement('div');
+                            feedbackWrap.className = 'mt-3';
                             data.detalles.forEach((d, i) => {
-                                feedbackHtml += `
-                                    <div class="p-2 mb-2 bg-white rounded border">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <i class="fas ${d.esCorrecta ? 'fa-check text-dark' : 'fa-times text-danger'}"></i>
-                                            <span class="fw-semibold text-dark">Pregunta ${i+1}: ${d.esCorrecta ? 'Correcta' : 'Incorrecta'}</span>
-                                        </div>
-                                        <div class="text-muted small mt-1">${d.explicacion}</div>
-                                    </div>
-                                `;
+                                const item = document.createElement('div');
+                                item.className = 'p-2 mb-2 bg-white rounded border';
+
+                                const cabecera = document.createElement('div');
+                                cabecera.className = 'd-flex align-items-center gap-2';
+                                const icono = document.createElement('i');
+                                icono.className = `fas ${d.esCorrecta ? 'fa-check text-dark' : 'fa-times text-danger'}`;
+                                const titulo = document.createElement('span');
+                                titulo.className = 'fw-semibold text-dark';
+                                titulo.textContent = `Pregunta ${i + 1}: ${d.esCorrecta ? 'Correcta' : 'Incorrecta'}`;
+                                cabecera.appendChild(icono);
+                                cabecera.appendChild(titulo);
+
+                                const explicacion = document.createElement('div');
+                                explicacion.className = 'text-muted small mt-1';
+                                explicacion.textContent = d.explicacion || '';
+
+                                item.appendChild(cabecera);
+                                item.appendChild(explicacion);
+                                feedbackWrap.appendChild(item);
                             });
-                            feedbackHtml += '</div>';
-                            feedbackEl.innerHTML = feedbackHtml;
+                            feedbackEl.replaceChildren(feedbackWrap);
                         }
                     } catch (err) {
                         console.error('Error al evaluar quiz:', err);

@@ -18,6 +18,8 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'El email es obligatorio'],
         unique: true,
+        lowercase: true,
+        trim: true,
         match: [
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
             'Por favor agrega un email válido'
@@ -28,7 +30,7 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'La contraseña es obligatoria'],
-        minlength: 6,
+        minlength: 8,
         select: false
     },
     // Rol del usuario en la plataforma. Por defecto es 'estudiante'.

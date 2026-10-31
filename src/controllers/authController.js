@@ -34,7 +34,10 @@ exports.getRegistro = (req, res) => {
  * intenta enviar un correo de bienvenida y luego inicia sesión automáticamente.
  */
 exports.postRegistro = async (req, res) => {
-    const { nombre, email, password } = req.body;
+    // SEGURIDAD: forzamos string y normalizamos el email antes de cualquier consulta.
+    const nombre = String(req.body.nombre || '').trim();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = String(req.body.password || '');
     let errors = [];
 
     // ── Validaciones básicas ──────────────────────────────────────────────
@@ -42,8 +45,8 @@ exports.postRegistro = async (req, res) => {
         errors.push({ msg: 'Por favor rellena todos los campos obligatorios' });
     }
 
-    if (password && password.length < 6) {
-        errors.push({ msg: 'La contraseña debe tener al menos 6 caracteres' });
+    if (password && password.length < 8) {
+        errors.push({ msg: 'La contraseña debe tener al menos 8 caracteres' });
     }
 
     // ── Rol: nunca se acepta del cliente en el registro público ───────────
@@ -55,22 +58,20 @@ exports.postRegistro = async (req, res) => {
             errors,
             nombre,
             email,
-            password,
             rolSolicitado,
             datosRegistro: { titulo: 'Crear Cuenta', descripcion: 'Únete a nuestra comunidad' }
         });
     }
 
     try {
-        // Verificar si el correo electrónico ya está registrado
-        let user = await User.findOne({ email: email });
+        // Verificar si el correo electrónico ya está registrado (sin distinguir mayúsculas)
+        let user = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
         if (user) {
             errors.push({ msg: 'El email ya está registrado' });
             return res.render('registro', {
                 errors,
                 nombre,
                 email,
-                password,
                 rolSolicitado,
                 datosRegistro: { titulo: 'Crear Cuenta', descripcion: 'Únete a nuestra comunidad' }
             });
@@ -89,8 +90,9 @@ exports.postRegistro = async (req, res) => {
 
         // ── Correo de bienvenida ──────────────────────────────────────────
         const rolesLabel = { estudiante: 'Estudiante', docente: 'Docente', admin: 'Administrador' };
+        const nombreSeguro = _escapeHtml(nombre);
         const message = `Hola ${nombre},\n\nGracias por unirte a Eduplat como ${rolesLabel[rolSolicitado]}. Estamos emocionados de tenerte aquí.`;
-        const html    = `<p>Hola <strong>${nombre}</strong>,</p><p>Gracias por unirte a Eduplat como <strong>${rolesLabel[rolSolicitado]}</strong>. Estamos emocionados de tenerte aquí.</p>`;
+        const html    = `<p>Hola <strong>${nombreSeguro}</strong>,</p><p>Gracias por unirte a Eduplat como <strong>${rolesLabel[rolSolicitado]}</strong>. Estamos emocionados de tenerte aquí.</p>`;
 
         try {
             await sendEmail({
@@ -156,14 +158,20 @@ exports.postLogin = (req, res, next) => {
 };
 
 /**
- * @route GET /logout
- * @description Cierra la sesión activa del usuario, limpia las variables de sesión y redirige al Home.
+ * @route POST /logout
+ * @description Cierra la sesión activa del usuario y destruye la sesión en el servidor.
+ * Se usa POST para evitar cierres de sesión por enlaces/prefetch de terceros.
  */
-exports.getLogout = (req, res, next) => {
+exports.postLogout = (req, res, next) => {
     req.logout((err) => {
         if (err) { return next(err); }
-        req.flash('success_msg', 'Has cerrado sesión exitosamente');
-        res.redirect('/');
+        if (!req.session) {
+            return res.redirect('/');
+        }
+        req.session.destroy(() => {
+            res.clearCookie('eduplat.sid');
+            res.redirect('/');
+        });
     });
 };
 
@@ -182,6 +190,21 @@ function _panelByRole(rol) {
 }
 
 /**
+ * @helper _escapeHtml
+ * @description Escapa caracteres peligrosos para plantillas HTML de correo.
+ * @param {string} texto Texto original.
+ * @returns {string} Texto escapado.
+ */
+function _escapeHtml(texto) {
+    return String(texto || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
  * @route GET /olvide-password
  * @description Muestra el formulario para solicitar restablecimiento de contraseña.
  */
@@ -196,14 +219,15 @@ exports.getOlvidePassword = (req, res) => {
  * @description Genera un token criptográfico, lo guarda con expiración de 1h y envía el enlace al email.
  */
 exports.postOlvidePassword = async (req, res) => {
-    const { email } = req.body;
+    // SEGURIDAD: string + normalización para evitar inyección NoSQL y variantes de email.
+    const email = String(req.body.email || '').trim().toLowerCase();
     try {
         if (!email) {
             req.flash('error_msg', 'Por favor ingresa tu correo electrónico.');
             return res.redirect('/olvide-password');
         }
 
-        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        const user = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
         if (!user) {
             req.flash('success_msg', 'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento.');
             return res.redirect('/olvide-password');
@@ -217,22 +241,25 @@ exports.postOlvidePassword = async (req, res) => {
         user.resetPasswordExpire = Date.now() + 3600000; // 1 hora de validez
         await user.save({ validateBeforeSave: false });
 
-        // URL de reseteo
-        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+        // SEGURIDAD: la URL se construye con APP_URL, nunca con la cabecera Host
+        // (evita Host-header poisoning). APP_URL es obligatoria en producción.
+        const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+        const resetUrl = `${appUrl}/reset-password/${resetToken}`;
+        const nombreSeguro = _escapeHtml(user.nombre);
 
         const mensaje = `Hola ${user.nombre},\n\nHas solicitado restablecer tu contraseña en Eduplat. Por favor ingresa al siguiente enlace para definir tu nueva clave:\n\n${resetUrl}\n\nEste enlace expirará en 1 hora. Si no solicitaste este cambio, puedes ignorar este correo.`;
 
         const html = `
             <div style="font-family: sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px;">
                 <h2 style="color: #090D16; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Restablecer Contraseña — Eduplat</h2>
-                <p style="color: #4b5563; font-size: 14px; line-height: 1.5;">Hola <strong>${user.nombre}</strong>,</p>
+                <p style="color: #4b5563; font-size: 14px; line-height: 1.5;">Hola <strong>${nombreSeguro}</strong>,</p>
                 <p style="color: #4b5563; font-size: 14px; line-height: 1.5;">Recibimos una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón a continuación para crear tu nueva clave:</p>
                 <div style="text-align: center; margin: 28px 0;">
                     <a href="${resetUrl}" style="background-color: #090D16; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">Restablecer Contraseña</a>
                 </div>
-                <p style="color: #9ca3af; font-size: 12px;">O copia este enlace en tu navegador:<br><a href="${resetUrl}" style="color: #2563eb;">${resetUrl}</a></p>
+                <p style="color: #6b7280; font-size: 12px;">O copia este enlace en tu navegador:<br><a href="${resetUrl}" style="color: #2563eb;">${resetUrl}</a></p>
                 <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-                <small style="color: #9ca3af; font-size: 11px;">Este enlace es válido durante 60 minutos. Si no realizaste esta solicitud, desestima este mensaje.</small>
+                <small style="color: #6b7280; font-size: 11px;">Este enlace es válido durante 60 minutos. Si no realizaste esta solicitud, desestima este mensaje.</small>
             </div>
         `;
 
@@ -248,19 +275,22 @@ exports.postOlvidePassword = async (req, res) => {
             console.error('Error al enviar email SMTP:', mailErr.message);
         }
 
-        console.log(`\n======================================================`);
-        console.log(`[RECUPERACIÓN DE CONTRASEÑA — EDUPLAT]`);
-        console.log(`Para: ${user.email}`);
-        console.log(`Enlace de restablecimiento: ${resetUrl}`);
-        if (mailResult && mailResult.previewUrl) {
-            console.log(`Bandeja Ethereal (Test Inbox): ${mailResult.previewUrl}`);
+        // SEGURIDAD: nunca imprimir el enlace ni datos del usuario en producción.
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`\n======================================================`);
+            console.log(`[RECUPERACIÓN DE CONTRASEÑA — EDUPLAT]`);
+            console.log(`Para: ${user.email}`);
+            console.log(`Enlace de restablecimiento: ${resetUrl}`);
+            if (mailResult && mailResult.previewUrl) {
+                console.log(`Bandeja Ethereal (Test Inbox): ${mailResult.previewUrl}`);
+            }
+            console.log(`======================================================\n`);
         }
-        console.log(`======================================================\n`);
 
-        if (mailResult && mailResult.previewUrl) {
-            req.flash('success_msg', `Se procesó la solicitud. Puedes <a href="${mailResult.previewUrl}" target="_blank" class="fw-bold text-dark text-decoration-underline">abrir el correo de prueba aquí</a> o usar el enlace directo generado.`);
-        } else {
-            req.flash('success_msg', 'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento en tu bandeja de entrada.');
+        // Mensaje genérico (no revela si el email existe) y enlace de preview escapado en la vista.
+        req.flash('success_msg', 'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento en tu bandeja de entrada.');
+        if (mailResult && mailResult.previewUrl && process.env.NODE_ENV !== 'production') {
+            req.flash('reset_preview_url', mailResult.previewUrl);
         }
         res.redirect('/olvide-password');
 
@@ -305,8 +335,9 @@ exports.getResetPassword = async (req, res) => {
  * @description Guarda la nueva contraseña del usuario y elimina el token de un solo uso.
  */
 exports.postResetPassword = async (req, res) => {
-    const { token } = req.params;
-    const { password, passwordConfirmar } = req.body;
+    const token = String(req.params.token || '');
+    const password = String(req.body.password || '');
+    const passwordConfirmar = String(req.body.passwordConfirmar || '');
 
     try {
         if (!password || !passwordConfirmar) {
@@ -314,8 +345,8 @@ exports.postResetPassword = async (req, res) => {
             return res.redirect(`/reset-password/${token}`);
         }
 
-        if (password.length < 6) {
-            req.flash('error_msg', 'La contraseña debe tener al menos 6 caracteres.');
+        if (password.length < 8) {
+            req.flash('error_msg', 'La contraseña debe tener al menos 8 caracteres.');
             return res.redirect(`/reset-password/${token}`);
         }
 

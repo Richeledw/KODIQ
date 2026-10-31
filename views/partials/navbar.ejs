@@ -86,10 +86,13 @@
                             </li>
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
-                                <a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2 btn-logout" href="/logout">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span>Cerrar Sesión</span>
-                                </a>
+                                <!-- Logout por POST: evita cierres de sesión accidentales por enlaces -->
+                                <form action="/logout" method="POST" class="m-0">
+                                    <button type="submit" class="dropdown-item py-2 text-danger d-flex align-items-center gap-2 btn-logout">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        <span>Cerrar Sesión</span>
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>
@@ -111,6 +114,8 @@
 
 <!-- Script para sincronizar persistencia de sesión en localStorage -->
 <script>
-    window.EDUPLAT_USER = <%- JSON.stringify(locals.user ? { id: user._id, nombre: user.nombre, email: user.email, rol: user.rol } : null) %>;
+    <% const usuarioSeguro = locals.user ? { id: user._id, nombre: user.nombre, email: user.email, rol: user.rol } : null; %>
+    <%-- SEGURIDAD: escapamos <, > y & para que el JSON no pueda cerrar el <script>. --%>
+    window.EDUPLAT_USER = <%- JSON.stringify(usuarioSeguro).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026') %>;
 </script>
 <script src="/js/navbar-auth.js"></script>

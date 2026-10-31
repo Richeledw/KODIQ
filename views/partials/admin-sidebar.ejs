@@ -56,9 +56,11 @@
                 <div class="font-mono text-muted" style="font-size:.72rem;">Administrador</div>
             </div>
         </div>
-        <a href="/logout" class="nav-link text-danger mt-1 btn-logout">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Cerrar sesión</span>
-        </a>
+        <form action="/logout" method="POST" class="m-0 mt-1">
+            <button type="submit" class="nav-link text-danger btn-logout border-0 bg-transparent w-100 text-start">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar sesión</span>
+            </button>
+        </form>
     </div>
 </aside>

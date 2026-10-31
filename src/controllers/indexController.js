@@ -64,7 +64,11 @@ exports.getContacto = (req, res) => {
  */
 exports.postContacto = async (req, res) => {
     try {
-        const { nombre, email, asunto, mensaje } = req.body;
+        // SEGURIDAD: forzamos string para que un body como email[$gt]= no llegue como objeto.
+        const nombre = String(req.body.nombre || '').trim();
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const asunto = String(req.body.asunto || '').trim();
+        const mensaje = String(req.body.mensaje || '').trim();
 
         if (!nombre || !email || !asunto || !mensaje) {
             return res.render('contacto', {

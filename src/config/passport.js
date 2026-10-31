@@ -2,10 +2,19 @@
  * @file passport.js
  * @description Configuración de las estrategias de autenticación local con Passport.js.
  * Define cómo buscar el usuario, validar su contraseña y manejar la sesión (serialización/deserialización).
+ *
+ * SEGURIDAD:
+ *  - El mensaje de error es genérico para no revelar si un email existe (enumeración).
+ *  - Cuando el usuario no existe se compara contra un hash falso para igualar tiempos
+ *    de respuesta y dificultar ataques de temporización.
  */
 
 const LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+
+// Hash de relleno generado una sola vez al arrancar (nunca se usa para autenticar).
+const HASH_FALSO = bcrypt.hashSync('eduplat-timing-equalizer', 10);
 
 /**
  * @function
@@ -16,22 +25,28 @@ module.exports = function (passport) {
     // Definimos la estrategia local usando el campo 'email' como nombre de usuario principal
     passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
         try {
-            // Buscamos el usuario por su correo electrónico.
-            // Usamos `.select('+password')` porque en el esquema de User, la contraseña está marcada
-            // como select: false para que no se devuelva por defecto en las consultas comunes.
-            const user = await User.findOne({ email }).select('+password');
+            // Normalizamos la entrada: nunca debe llegar un objeto desde el body.
+            const emailNormalizado = String(email || '').trim().toLowerCase();
+            const passwordSegura = String(password || '');
 
-            // Si no se encuentra el usuario con dicho email
+            // Buscamos el usuario por email. La collation permite encontrar cuentas
+            // antiguas guardadas con mayúsculas sin necesidad de migrarlas.
+            const user = await User.findOne({ email: emailNormalizado })
+                .collation({ locale: 'en', strength: 2 })
+                .select('+password');
+
+            // Si no se encuentra el usuario, comparamos contra un hash falso y
+            // devolvemos el mismo mensaje genérico que una contraseña incorrecta.
             if (!user) {
-                return done(null, false, { message: 'El email no está registrado' });
+                await bcrypt.compare(passwordSegura, HASH_FALSO);
+                return done(null, false, { message: 'Credenciales incorrectas' });
             }
 
             // Verificamos si la contraseña coincide llamando al método del modelo de usuario
-            const isMatch = await user.matchPassword(password);
+            const isMatch = await user.matchPassword(passwordSegura);
 
-            // Si la contraseña no es correcta
             if (!isMatch) {
-                return done(null, false, { message: 'Contraseña incorrecta' });
+                return done(null, false, { message: 'Credenciales incorrectas' });
             }
 
             // Verificamos si la cuenta está activa

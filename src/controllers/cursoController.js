@@ -9,6 +9,7 @@ const User = require('../models/User');
 const Enrollment = require('../models/Enrollment');
 const StudentProject = require('../models/StudentProject');
 const staticCursos = require('../models/cursosData');
+const crypto = require('crypto');
 
 /**
  * @route GET /temas
@@ -384,11 +385,14 @@ exports.postGuardarProyecto = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { titulo, descripcion, notasAvance, repositorioUrl, despliegueUrl, estado } = req.body;
+    const { titulo, descripcion, notasAvance, repositorioUrl, despliegueUrl, videoDemoUrl, estado } = req.body;
 
     try {
         const user = req.user;
         const curso = await Course.findOne({ id });
+
+        // Blindaje RBAC: El estudiante solo puede marcar 'En Progreso' o 'En Revisión'. 'Completado' requiere calificación docente/admin.
+        const estadoPermitido = (estado === 'En Revisión') ? 'En Revisión' : 'En Progreso';
 
         const proyecto = await StudentProject.findOneAndUpdate(
             { estudiante: user._id, cursoId: id },
@@ -403,7 +407,8 @@ exports.postGuardarProyecto = async (req, res) => {
                 notasAvance: notasAvance || '',
                 repositorioUrl: repositorioUrl || '',
                 despliegueUrl: despliegueUrl || '',
-                estado: estado || 'En Progreso',
+                videoDemoUrl: videoDemoUrl || '',
+                estado: estadoPermitido,
                 actualizadoEn: new Date()
             },
             { upsert: true, new: true }
@@ -435,3 +440,164 @@ exports.postGuardarProyecto = async (req, res) => {
  * @description Compatibilidad hacia atrás con endpoints anteriores
  */
 exports.postCompletarProgreso = exports.postCompletarLeccion;
+
+/**
+ * @route GET /curso/:id/certificado
+ * @description Genera y renderiza el certificado de finalización si el estudiante cumplió el 100% de lecciones y tiene el proyecto aprobado.
+ */
+exports.getCertificado = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const curso = await Course.findOne({ id });
+
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/panel');
+        }
+
+        const user = await User.findById(req.user.id);
+        const inscripcion = user.cursosInscritos.find(c => c.cursoId === id);
+
+        if (!inscripcion) {
+            req.flash('error_msg', 'No estás inscrito en este curso.');
+            return res.redirect(`/curso/${id}`);
+        }
+
+        // 1. Validar que las lecciones estén al 100%
+        let totalLecciones = 0;
+        if (curso.modulos && curso.modulos.length > 0) {
+            curso.modulos.forEach(m => {
+                if (m.lecciones) totalLecciones += m.lecciones.length;
+            });
+        }
+        if (totalLecciones === 0) totalLecciones = 1;
+
+        const leccionesCompletadasCount = (inscripcion.leccionesCompletadas || []).length;
+        const leccionesAl100 = leccionesCompletadasCount >= totalLecciones || (inscripcion.progreso || 0) === 100;
+
+        // 2. Validar que el proyecto práctico esté evaluado y aprobado por docente o admin
+        const proyecto = await StudentProject.findOne({
+            estudiante: user._id,
+            cursoId: id,
+            estado: 'Completado'
+        });
+
+        if (!leccionesAl100 || !proyecto) {
+            req.flash('error_msg', 'Para obtener tu certificación oficial debes completar el 100% de las lecciones del curso y tener tu proyecto práctico aprobado por el docente.');
+            return res.redirect(`/curso/${id}/aula`);
+        }
+
+        // Generar hash único de certificación
+        const hashCertificado = crypto.createHash('sha256')
+            .update(`${user._id}-${id}-eduplat-verified-cert`)
+            .digest('hex')
+            .substring(0, 12)
+            .toUpperCase();
+
+        res.render('certificado', {
+            user,
+            curso,
+            proyecto,
+            hashCertificado
+        });
+
+    } catch (err) {
+        console.error('Error al generar certificado:', err);
+        req.flash('error_msg', 'Error al procesar la certificación.');
+        res.redirect(`/curso/${req.params.id}/aula`);
+    }
+};
+
+/**
+ * @route POST /curso/:id/modulo/:mIndex/quiz/evaluar
+ * @description Evalúa interactivamente las respuestas del cuestionario de un módulo y devuelve retroalimentación inmediata.
+ */
+exports.postEvaluarQuiz = async (req, res) => {
+    try {
+        const { id, mIndex } = req.params;
+        const { respuestas } = req.body;
+
+        const curso = await Course.findOne({ id });
+        if (!curso || !curso.modulos || !curso.modulos[mIndex]) {
+            return res.status(404).json({ success: false, msg: 'Módulo no encontrado.' });
+        }
+
+        const modulo = curso.modulos[mIndex];
+        let quizPreguntas = modulo.quiz;
+
+        if (!quizPreguntas || quizPreguntas.length === 0) {
+            quizPreguntas = [
+                {
+                    pregunta: `¿Cuál es el principio fundamental abordado en "${modulo.titulo}"?`,
+                    opciones: [
+                        'Estructurar código limpio y modular siguiendo estándares de la industria',
+                        'Ignorar los estándares y utilizar configuraciones por defecto sin validar',
+                        'Escribir toda la lógica en un solo archivo sin separación de conceptos',
+                        'Desactivar las validaciones para acelerar el desarrollo'
+                    ],
+                    respuestaCorrecta: 0,
+                    explicacion: 'La modularidad y la separación de responsabilidades son esenciales para la mantenibilidad y escalabilidad del software.'
+                },
+                {
+                    pregunta: '¿Por qué es indispensable validar los datos de entrada antes de persistirlos en la base de datos?',
+                    opciones: [
+                        'Para evitar errores de ejecución, inyecciones de datos y asegurar consistencia',
+                        'Únicamente por motivos estéticos en la interfaz de usuario',
+                        'No es necesario si la base de datos es NoSQL',
+                        'Solo se requiere si el servidor tiene poco almacenamiento'
+                    ],
+                    respuestaCorrecta: 0,
+                    explicacion: 'Validar entradas sanitiza las peticiones y previene inconsistencias o vulnerabilidades de seguridad.'
+                },
+                {
+                    pregunta: '¿Cuál es la mejor práctica recomendada al estructurar proyectos web profesionales?',
+                    opciones: [
+                        'Seguir una arquitectura en capas (rutas, controladores, modelos y middlewares)',
+                        'Colocar toda la lógica de negocio dentro de las vistas EJS',
+                        'No usar variables de entorno para las credenciales',
+                        'Evitar el control de versiones en git'
+                    ],
+                    respuestaCorrecta: 0,
+                    explicacion: 'Una arquitectura desacoplada (como MVC) facilita el testing, la refactorización y el trabajo en equipo.'
+                }
+            ];
+        }
+
+        let aciertos = 0;
+        const total = quizPreguntas.length;
+        const detalles = [];
+
+        quizPreguntas.forEach((q, idx) => {
+            const respuestaUsuario = respuestas ? Number(respuestas[idx]) : -1;
+            const esCorrecta = respuestaUsuario === q.respuestaCorrecta;
+            if (esCorrecta) aciertos++;
+
+            detalles.push({
+                pregunta: q.pregunta,
+                opcionSeleccionada: respuestaUsuario,
+                esCorrecta,
+                respuestaCorrecta: q.respuestaCorrecta,
+                explicacion: q.explicacion
+            });
+        });
+
+        const porcentaje = Math.round((aciertos / total) * 100);
+        const aprobado = porcentaje >= 70;
+
+        return res.json({
+            success: true,
+            total,
+            aciertos,
+            porcentaje,
+            aprobado,
+            detalles,
+            mensaje: aprobado 
+                ? `¡Felicitaciones! Has aprobado el cuestionario con ${porcentaje}% (${aciertos}/${total}).`
+                : `Has obtenido ${porcentaje}% (${aciertos}/${total}). Revisa las explicaciones e inténtalo de nuevo para afianzar el aprendizaje.`
+        });
+
+    } catch (err) {
+        console.error('Error al evaluar quiz:', err);
+        return res.status(500).json({ success: false, msg: 'Error al evaluar cuestionario.' });
+    }
+};

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="termGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181B"/>
+      <stop offset="100%" stop-color="#09090B"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Icon Frame -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#termGrad)" stroke="#27272A" stroke-width="2"/>
+  
+  <!-- Mini Top Bar Dots -->
+  <circle cx="14" cy="14" r="2.5" fill="#EF4444" opacity="0.8"/>
+  <circle cx="22" cy="14" r="2.5" fill="#F59E0B" opacity="0.8"/>
+  <circle cx="30" cy="14" r="2.5" fill="#10B981" opacity="0.8"/>
+  
+  <!-- Terminal Prompt Symbol >_ -->
+  <path d="M16 26 L28 35 L16 44" fill="none" stroke="#10B981" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="33" y1="44" x2="48" y2="44" stroke="#FAFAFA" stroke-width="4.5" stroke-linecap="round"/>
+</svg>

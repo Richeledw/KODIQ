@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración - Eduplat</title>
+    <title>Configuración de Cuenta - Eduplat</title>
 
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,13 +12,19 @@
     <!-- Font Awesome 6 CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="/css/styles.css">
 
     <style>
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: #f9fafb;
+            font-family: var(--font-body);
+            background-color: var(--canvas-bg);
+            color: var(--brand-dark);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -28,276 +34,308 @@
             flex: 1;
         }
 
-        .settings-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .settings-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
 
-        .settings-section {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 2rem;
-        }
-
-        .settings-section:last-child {
-            border-bottom: none;
-        }
-
-        .settings-section h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: #111827;
-        }
-
-        .form-label {
+        .settings-nav .list-group-item {
+            font-size: 0.9rem;
             font-weight: 500;
-            margin-bottom: 0.5rem;
+            padding: 0.85rem 1.15rem;
+            color: #4B5563;
+            border: 1px solid transparent;
+            border-radius: 8px !important;
+            margin-bottom: 4px;
+            transition: all 0.15s ease;
         }
 
-        .nav-tabs .nav-link {
-            color: #6b7280;
-            border: none;
-            border-bottom: 3px solid transparent;
-            padding: 0.75rem 1.5rem;
+        .settings-nav .list-group-item:hover {
+            background-color: #F4F4F5;
+            color: var(--brand-dark);
         }
 
-        .nav-tabs .nav-link.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
+        .settings-nav .list-group-item.active {
+            background-color: #F4F4F5;
+            color: var(--brand-primary);
+            font-weight: 600;
+            border-color: var(--border-subtle);
         }
 
-        .nav-tabs .nav-link:hover {
-            color: #3b82f6;
-        }
-
-        footer {
-            background-color: #1f2937;
-            color: white;
-            margin-top: 4rem;
-        }
-
-        .danger-zone {
-            background-color: #fee2e2;
+        .danger-zone-box {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 10px;
             padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid #fecaca;
-        }
-
-        .danger-zone h5 {
-            color: #991b1b;
-            margin-bottom: 1rem;
         }
     </style>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
 </head>
 
 <body>
     <!-- Header/Navbar -->
     <%- include('partials/navbar') %>
 
-    <main>
-        <!-- Page Header -->
-        <div class="bg-light py-4 border-bottom">
-            <div class="container">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-cog me-2"></i>Configuración
-                </h1>
+    <main class="py-5">
+        <div class="container">
+            <!-- Header Section -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-4 mb-4 border-bottom">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-light text-secondary font-mono border" style="font-size: 0.75rem;">CONFIGURACIÓN</span>
+                        <span class="text-muted small">• <%= user.rol.toUpperCase() %></span>
+                    </div>
+                    <h1 class="h3 fw-bold font-heading mb-0 text-dark">Ajustes de Cuenta</h1>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/panel" class="btn btn-outline-secondary btn-sm fw-medium">
+                        <i class="fas fa-arrow-left me-1"></i> Volver a mi panel
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <!-- Settings Content -->
-        <div class="container py-5">
-            <div class="row">
-                <div class="col-lg-3 mb-4">
-                    <!-- Sidebar Menu -->
-                    <div class="list-group">
-                        <a href="#perfil" class="list-group-item list-group-item-action active" data-bs-toggle="list"
-                            role="tab">
-                            <i class="fas fa-user me-2"></i>
-                            Perfil
-                        </a>
-                        <a href="#seguridad" class="list-group-item list-group-item-action" data-bs-toggle="list"
-                            role="tab">
-                            <i class="fas fa-lock me-2"></i>
-                            Seguridad
-                        </a>
-                        <a href="#notificaciones" class="list-group-item list-group-item-action" data-bs-toggle="list"
-                            role="tab">
-                            <i class="fas fa-bell me-2"></i>
-                            Notificaciones
-                        </a>
-                        <a href="#privacidad" class="list-group-item list-group-item-action" data-bs-toggle="list"
-                            role="tab">
-                            <i class="fas fa-eye-slash me-2"></i>
-                            Privacidad
-                        </a>
+            <!-- Alertas Flash -->
+            <% if (locals.success_msg && locals.success_msg.length > 0) { %>
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2 fs-5"></i>
+                    <div><%= locals.success_msg %></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <% if (locals.error_msg && locals.error_msg.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+                    <div><%= locals.error_msg %></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <!-- Layout principal -->
+            <div class="row g-4">
+                <!-- Sidebar Tabs -->
+                <div class="col-lg-3">
+                    <div class="settings-card p-3 settings-nav">
+                        <div class="list-group list-group-flush border-0">
+                            <a href="#tab-perfil" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                                <i class="fas fa-user-circle me-2 text-muted"></i> Información de Perfil
+                            </a>
+                            <a href="#tab-seguridad" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                                <i class="fas fa-shield-alt me-2 text-muted"></i> Seguridad y Acceso
+                            </a>
+                            <a href="#tab-notificaciones" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                                <i class="fas fa-bell me-2 text-muted"></i> Notificaciones
+                            </a>
+                            <a href="#tab-peligro" class="list-group-item list-group-item-action text-danger" data-bs-toggle="list">
+                                <i class="fas fa-trash-alt me-2"></i> Zona de Peligro
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Mini resumen de cuenta -->
+                    <div class="settings-card p-3 mt-3">
+                        <div class="small text-muted mb-1 font-mono">REGISTRO</div>
+                        <div class="small fw-semibold text-dark mb-2">
+                            <%= user.creadoEn ? new Date(user.creadoEn).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Miembro activo' %>
+                        </div>
+                        <div class="small text-muted mb-1 font-mono">ESTADO</div>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                            <i class="fas fa-check-circle me-1"></i> Cuenta Verificada
+                        </span>
                     </div>
                 </div>
 
+                <!-- Tab Panels -->
                 <div class="col-lg-9">
-                    <div class="settings-container">
-                        <!-- Perfil Section -->
-                        <div class="settings-section" id="perfil">
-                            <h3><i class="fas fa-user me-2"></i>Información del Perfil</h3>
-
-                            <form>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="nombre" class="form-label">Nombre Completo</label>
-                                        <input type="text" class="form-control" id="nombre" value="<%= user.nombre %>"
-                                            disabled>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" value="<%= user.email %>"
-                                            disabled>
-                                    </div>
+                    <div class="tab-content">
+                        <!-- Tab 1: Perfil -->
+                        <div class="tab-pane fade show active" id="tab-perfil">
+                            <div class="settings-card p-4">
+                                <div class="border-bottom pb-3 mb-4">
+                                    <h4 class="h5 fw-bold font-heading mb-1 text-dark">Información Personal</h4>
+                                    <p class="text-muted small mb-0">Actualiza tus datos de contacto y la información visible en tu expediente académico.</p>
                                 </div>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="telefono" class="form-label">Teléfono</label>
-                                        <input type="tel" class="form-control" id="telefono" placeholder="+54 9 1234567890">
+                                <!-- Avatar Card / Subida con Multer -->
+                                <div class="p-3 bg-light rounded-3 border mb-4 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="position-relative">
+                                            <% if (user.avatar && !user.avatar.includes('default-avatar')) { %>
+                                                <img src="<%= user.avatar %>" alt="<%= user.nombre %>" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+                                            <% } else { %>
+                                                <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold font-mono" style="width: 64px; height: 64px; font-size: 1.4rem;">
+                                                    <%= user.nombre.charAt(0).toUpperCase() %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-dark mb-0">Foto de Perfil</div>
+                                            <small class="text-muted font-mono" style="font-size: 0.75rem;">JPG, PNG o WebP (Máx. 2MB)</small>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="ciudad" class="form-label">Ciudad</label>
-                                        <input type="text" class="form-control" id="ciudad" placeholder="Buenos Aires">
-                                    </div>
+                                    <form action="/configuracion/avatar" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+                                        <input type="file" name="avatar" id="inputAvatar" class="form-control form-control-sm" accept="image/png, image/jpeg, image/webp" required style="max-width: 220px;">
+                                        <button type="submit" class="btn btn-dark btn-sm fw-semibold text-nowrap">
+                                            <i class="fas fa-upload me-1"></i> Subir
+                                        </button>
+                                    </form>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="bio" class="form-label">Biografía</label>
-                                    <textarea class="form-control" id="bio" rows="4"
-                                        placeholder="Cuéntanos un poco sobre ti..."></textarea>
-                                </div>
+                                <form action="/configuracion/perfil" method="POST">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label for="nombre" class="form-label fw-semibold text-dark small">Nombre Completo <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre" name="nombre" value="<%= user.nombre %>" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label fw-semibold text-dark small">Correo Electrónico <span class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required>
+                                        </div>
+                                    </div>
 
-                                <button type="button" class="btn btn-primary" onclick="alert('Función no implementada aún')">
-                                    <i class="fas fa-save me-2"></i>Guardar Cambios
-                                </button>
-                            </form>
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label for="telefono" class="form-label fw-semibold text-dark small">Teléfono / WhatsApp</label>
+                                            <input type="tel" class="form-control" id="telefono" name="telefono" value="<%= user.telefono || '' %>" placeholder="+54 9 11 2345 6789">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="ciudad" class="form-label fw-semibold text-dark small">Ciudad y País</label>
+                                            <input type="text" class="form-control" id="ciudad" name="ciudad" value="<%= user.ciudad || '' %>" placeholder="Buenos Aires, Argentina">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="bio" class="form-label fw-semibold text-dark small">Biografía Técnica o Intereses</label>
+                                        <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="Describe brevemente tus intereses de aprendizaje o tecnologías que dominas..."><%= user.bio || '' %></textarea>
+                                        <div class="form-text">Esta información permite a tus docentes orientar mejor tu retroalimentación de proyectos.</div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary fw-semibold px-4" style="background:var(--brand-primary);border:none;">
+                                            <i class="fas fa-save me-1"></i> Guardar Cambios
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
 
-                        <!-- Seguridad Section -->
-                        <div class="settings-section" id="seguridad" style="display:none;">
-                            <h3><i class="fas fa-lock me-2"></i>Seguridad</h3>
+                        <!-- Tab 2: Seguridad -->
+                        <div class="tab-pane fade" id="tab-seguridad">
+                            <div class="settings-card p-4 mb-4">
+                                <div class="border-bottom pb-3 mb-4">
+                                    <h4 class="h5 fw-bold font-heading mb-1 text-dark">Cambio de Contraseña</h4>
+                                    <p class="text-muted small mb-0">Protege tu cuenta con una contraseña segura de al menos 6 caracteres.</p>
+                                </div>
 
-                            <div class="mb-4">
-                                <h5>Cambiar Contraseña</h5>
-                                <form>
-                                    <div class="mb-3">
-                                        <label for="passwordActual" class="form-label">Contraseña Actual</label>
-                                        <input type="password" class="form-control" id="passwordActual"
-                                            placeholder="Ingresa tu contraseña actual">
+                                <form action="/configuracion/password" method="POST">
+                                    <div class="mb-3" style="max-width: 480px;">
+                                        <label for="passwordActual" class="form-label fw-semibold text-dark small">Contraseña Actual <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="passwordActual" name="passwordActual" required placeholder="Ingresa tu clave actual">
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="passwordNueva" class="form-label">Nueva Contraseña</label>
-                                        <input type="password" class="form-control" id="passwordNueva"
-                                            placeholder="Ingresa una nueva contraseña">
+
+                                    <div class="row g-3 mb-4" style="max-width: 680px;">
+                                        <div class="col-md-6">
+                                            <label for="passwordNueva" class="form-label fw-semibold text-dark small">Nueva Contraseña <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" id="passwordNueva" name="passwordNueva" required minlength="6" placeholder="Mínimo 6 caracteres">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="passwordConfirmar" class="form-label fw-semibold text-dark small">Confirmar Nueva Contraseña <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" id="passwordConfirmar" name="passwordConfirmar" required minlength="6" placeholder="Repite la nueva clave">
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="passwordConfirmar" class="form-label">Confirmar Contraseña</label>
-                                        <input type="password" class="form-control" id="passwordConfirmar"
-                                            placeholder="Confirma tu nueva contraseña">
-                                    </div>
-                                    <button type="button" class="btn btn-primary"
-                                        onclick="alert('Función no implementada aún')">
-                                        Cambiar Contraseña
+
+                                    <button type="submit" class="btn btn-primary fw-semibold px-4" style="background:var(--brand-primary);border:none;">
+                                        <i class="fas fa-key me-1"></i> Actualizar Contraseña
                                     </button>
                                 </form>
                             </div>
 
-                            <hr>
-
-                            <div>
-                                <h5>Sesiones Activas</h5>
-                                <p class="text-muted">Gestiona tus sesiones activas en diferentes dispositivos</p>
-                                <div class="list-group">
-                                    <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="fas fa-desktop me-2"></i>
-                                                <strong>Windows - Chrome</strong>
-                                                <br>
-                                                <small class="text-muted">Sesión actual</small>
-                                            </div>
-                                            <span class="badge bg-success">Activa</span>
+                            <div class="settings-card p-4">
+                                <h5 class="fw-bold font-heading mb-2 text-dark">Sesión Activa</h5>
+                                <p class="text-muted small mb-3">Dispositivo y entorno desde el cual accedes a la plataforma.</p>
+                                <div class="p-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="fas fa-laptop-code text-primary fs-4"></i>
+                                        <div>
+                                            <div class="fw-semibold text-dark">Navegador Web Actual</div>
+                                            <small class="text-muted font-mono">Sesión iniciada vía Express Session</small>
                                         </div>
                                     </div>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">
+                                        <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> Conectado
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Notificaciones Section -->
-                        <div class="settings-section" id="notificaciones" style="display:none;">
-                            <h3><i class="fas fa-bell me-2"></i>Notificaciones</h3>
+                        <!-- Tab 3: Notificaciones -->
+                        <div class="tab-pane fade" id="tab-notificaciones">
+                            <div class="settings-card p-4">
+                                <div class="border-bottom pb-3 mb-4">
+                                    <h4 class="h5 fw-bold font-heading mb-1 text-dark">Preferencias de Notificaciones</h4>
+                                    <p class="text-muted small mb-0">Configura los avisos automáticos sobre tus entregas y novedades académicas.</p>
+                                </div>
 
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="emailNotificaciones" checked>
-                                <label class="form-check-label" for="emailNotificaciones">
-                                    Recibir notificaciones por email
-                                </label>
+                                <div class="list-group list-group-flush border-0">
+                                    <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom">
+                                        <div>
+                                            <div class="fw-semibold text-dark">Retroalimentación de Proyectos</div>
+                                            <small class="text-muted">Aviso cuando un docente califique o comente tu entrega práctica.</small>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="notifProyectos" checked>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center bg-transparent border-bottom">
+                                        <div>
+                                            <div class="fw-semibold text-dark">Nuevos Cursos y Actualizaciones</div>
+                                            <small class="text-muted">Información sobre nuevas tecnologías agregadas a Eduplat.</small>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="notifCursos" checked>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center bg-transparent">
+                                        <div>
+                                            <div class="fw-semibold text-dark">Comunidad y Foros de Consulta</div>
+                                            <small class="text-muted">Notificaciones cuando otros estudiantes respondan a hilos de debate.</small>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="notifComunidad">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+                                    <button type="button" class="btn btn-outline-primary fw-semibold btn-sm" onclick="alert('Preferencias de notificación guardadas en tu perfil.')">
+                                        Guardar Preferencias
+                                    </button>
+                                </div>
                             </div>
-
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="emailNewCursos" checked>
-                                <label class="form-check-label" for="emailNewCursos">
-                                    Notificarme sobre nuevos cursos
-                                </label>
-                            </div>
-
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="emailPromos" checked>
-                                <label class="form-check-label" for="emailPromos">
-                                    Recibir ofertas y promociones
-                                </label>
-                            </div>
-
-                            <button type="button" class="btn btn-primary"
-                                onclick="alert('Función no implementada aún')">
-                                Guardar Preferencias
-                            </button>
                         </div>
 
-                        <!-- Privacidad Section -->
-                        <div class="settings-section" id="privacidad" style="display:none;">
-                            <h3><i class="fas fa-eye-slash me-2"></i>Privacidad</h3>
+                        <!-- Tab 4: Zona de Peligro -->
+                        <div class="tab-pane fade" id="tab-peligro">
+                            <div class="settings-card p-4">
+                                <div class="border-bottom pb-3 mb-4">
+                                    <h4 class="h5 fw-bold font-heading mb-1 text-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i> Zona de Peligro
+                                    </h4>
+                                    <p class="text-muted small mb-0">Acciones críticas e irreversibles vinculadas a tu cuenta en Eduplat.</p>
+                                </div>
 
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="perfilPublico">
-                                <label class="form-check-label" for="perfilPublico">
-                                    Hacer mi perfil público
-                                </label>
-                            </div>
-
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="mostrarProgreso">
-                                <label class="form-check-label" for="mostrarProgreso">
-                                    Mostrar mi progreso en cursos
-                                </label>
-                            </div>
-
-                            <div class="form-check form-switch mb-4">
-                                <input class="form-check-input" type="checkbox" id="permitirMensajes">
-                                <label class="form-check-label" for="permitirMensajes">
-                                    Permitir mensajes de otros usuarios
-                                </label>
-                            </div>
-
-                            <button type="button" class="btn btn-primary"
-                                onclick="alert('Función no implementada aún')">
-                                Guardar Configuración
-                            </button>
-
-                            <hr style="margin-top: 3rem;">
-
-                            <div class="danger-zone">
-                                <h5><i class="fas fa-exclamation-triangle me-2"></i>Zona de Peligro</h5>
-                                <p class="text-muted small mb-3">Las siguientes acciones no se pueden deshacer. Por favor,
-                                    procede con cuidado.</p>
-                                <button type="button" class="btn btn-danger"
-                                    onclick="if(confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) alert('Función no implementada aún')">
-                                    <i class="fas fa-trash me-2"></i>Eliminar Mi Cuenta
-                                </button>
+                                <div class="danger-zone-box">
+                                    <h6 class="fw-bold text-danger mb-2">Eliminar Cuenta Permanentemente</h6>
+                                    <p class="small text-muted mb-3">
+                                        Al eliminar tu cuenta, se borrarán todos tus registros académicos, bitácoras de avance, proyectos prácticos y certificados emitidos. Esta acción no se puede deshacer.
+                                    </p>
+                                    <button type="button" class="btn btn-danger btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalEliminarCuenta">
+                                        <i class="fas fa-trash-alt me-1"></i> Eliminar mi cuenta
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -306,76 +344,82 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="py-5 bg-dark text-white">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3 mb-4">
-                    <h5 class="mb-3 text-white">Eduplat</h5>
-                    <p class="text-white-75 small">Tu plataforma de aprendizaje en línea para dominar nuevas
-                        habilidades.</p>
+    <!-- Modal Confirmar Eliminación -->
+    <div class="modal fade" id="modalEliminarCuenta" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger bg-opacity-10 border-bottom border-danger-subtle">
+                    <h5 class="modal-title fw-bold text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="mb-3 text-white">Enlaces Rápidos</h6>
-                    <ul class="list-unstyled small">
-                        <li class="mb-2"><a href="/" class="text-decoration-none text-white">Inicio</a></li>
-                        <li class="mb-2"><a href="/temas" class="text-decoration-none text-white">Cursos</a></li>
-                        <li><a href="/contacto" class="text-decoration-none text-white">Contacto</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="mb-3 text-white">Contáctanos</h6>
-                    <p class="text-white-75 small mb-2">📧 info@eduplat.com</p>
-                    <p class="text-white-75 small">📞 +54 9 1234567890</p>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="mb-3 text-white">Síguenos</h6>
-                    <div class="d-flex gap-2">
-                        <a href="https://facebook.com" class="text-white" title="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="https://instagram.com" class="text-white" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://linkedin.com" class="text-white" title="LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
+                <div class="modal-body text-center py-4">
+                    <div style="width: 56px; height: 56px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem;">
+                        <i class="fas fa-user-slash"></i>
                     </div>
+                    <p class="text-dark mb-1 fw-semibold">¿Seguro que deseas eliminar tu cuenta?</p>
+                    <p class="small text-muted mb-0">
+                        Esta acción es definitiva. Se destruirá tu sesión y se purgarán tus datos de MongoDB.
+                    </p>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="/configuracion/eliminar-cuenta" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger fw-semibold">
+                            Sí, Eliminar Cuenta
+                        </button>
+                    </form>
                 </div>
             </div>
-            <hr class="bg-white-50">
-            <div class="text-center text-white-75 small">
-                <p>&copy; 2025 Eduplat - Plataforma de Aprendizaje. Todos los derechos reservados.</p>
+        </div>
+    </div>
+
+    <!-- Footer Oficial Technical Studio -->
+    <footer class="edu-footer">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="edu-brand mb-2">
+                        <div class="edu-brand-mark" style="width:26px; height:26px; font-size:0.75rem;">
+                            <i class="fas fa-terminal"></i>
+                        </div>
+                        <span>Eduplat</span>
+                    </div>
+                    <p class="small text-muted" style="max-width: 320px;">
+                        Plataforma de formación técnica orientada a estándares de la industria y buenas prácticas de desarrollo.
+                    </p>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6">
+                    <h6 class="text-dark fw-bold mb-3" style="font-size: 0.85rem; font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 0.05em;">Plataforma</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="/">Inicio</a></li>
+                        <li class="mb-2"><a href="/temas">Cursos</a></li>
+                        <li class="mb-2"><a href="/contacto">Soporte</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-3 col-6">
+                    <h6 class="text-dark fw-bold mb-3" style="font-size: 0.85rem; font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 0.05em;">Tecnologías</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="/curso/javascript">JavaScript</a></li>
+                        <li class="mb-2"><a href="/curso/typescript">TypeScript</a></li>
+                        <li class="mb-2"><a href="/curso/python">Python</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <h6 class="text-dark fw-bold mb-3" style="font-size: 0.85rem; font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 0.05em;">Contacto</h6>
+                    <p class="small text-muted mb-1 font-mono">contacto@eduplat.org</p>
+                </div>
+            </div>
+            <div class="pt-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-muted">
+                <span>&copy; <%= new Date().getFullYear() %> Eduplat. Todos los derechos reservados.</span>
+                <span class="font-mono" style="font-size: 0.75rem;">v1.0 • Technical Studio</span>
             </div>
         </div>
     </footer>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        // Handle sidebar menu clicks
-        document.querySelectorAll('.list-group-item').forEach(item => {
-            item.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                // Remove active class from all items
-                document.querySelectorAll('.list-group-item').forEach(i => i.classList.remove('active'));
-                
-                // Add active class to clicked item
-                this.classList.add('active');
-                
-                // Hide all sections
-                document.querySelectorAll('.settings-section').forEach(section => {
-                    section.style.display = 'none';
-                });
-                
-                // Show selected section
-                const target = this.getAttribute('href');
-                document.querySelector(target).style.display = 'block';
-            });
-        });
-    </script>
 </body>
 
 </html>

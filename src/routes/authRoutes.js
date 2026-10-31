@@ -39,4 +39,10 @@ router.get('/api/auth/session', (req, res) => {
     return res.json({ authenticated: false, user: null });
 });
 
+// Rutas de Recuperación de Contraseña
+router.get('/olvide-password', redirectIfAuth, authController.getOlvidePassword);
+router.post('/olvide-password', authController.postOlvidePassword);
+router.get('/reset-password/:token', redirectIfAuth, authController.getResetPassword);
+router.post('/reset-password/:token', authController.postResetPassword);
+
 module.exports = router;

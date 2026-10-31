@@ -33,4 +33,10 @@ router.post('/curso/:id/proyecto/guardar', isAuth, cursoController.postGuardarPr
 // Compatibilidad con endpoint API previo
 router.post('/api/progreso/completar', isAuth, cursoController.postCompletarProgreso);
 
+// Certificado oficial de finalización
+router.get('/curso/:id/certificado', isAuth, cursoController.getCertificado);
+
+// Evaluación interactiva de quiz por módulo
+router.post('/curso/:id/modulo/:mIndex/quiz/evaluar', isAuth, cursoController.postEvaluarQuiz);
+
 module.exports = router;

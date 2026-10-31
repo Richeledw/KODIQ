@@ -16,6 +16,13 @@ const dotenv = require('dotenv');
 // Cargar variables de entorno del archivo .env
 dotenv.config();
 
+// SEGURIDAD: sin SESSION_SECRET el servidor no arranca (antes caía en 'secreto')
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 16) {
+    console.error('Falta SESSION_SECRET en .env (mínimo 16 caracteres; recomendado 64 hex). Genera uno con:');
+    console.error("  node -e \"console.log(require('crypto').randomBytes(48).toString('hex'))\"");
+    process.exit(1);
+}
+
 // Importar configuración de conexión a la BD y autenticación
 const connectDB = require('./src/config/db');
 
@@ -42,9 +49,15 @@ app.set('views', path.join(__dirname, 'views'));
 // Servir archivos estáticos desde el directorio '/public'
 // Si se solicita un archivo SVG, nos aseguramos de que el navegador lo interprete con el tipo MIME correcto.
 app.use(express.static(path.join(__dirname, 'public'), {
-    setHeaders: (res, path) => {
-        if (path.endsWith('.svg')) {
+    setHeaders: (res, filePath) => {
+        // El navegador nunca debe "adivinar" el tipo de un archivo estático
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        if (filePath.endsWith('.svg')) {
             res.type('image/svg+xml');
+        }
+        // Archivos subidos por usuarios: aislados, no pueden ejecutar scripts aunque se cuele uno
+        if (filePath.includes(`${path.sep}uploads${path.sep}`)) {
+            res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
         }
     }
 }));
@@ -55,7 +68,7 @@ app.use(express.json());
 
 // Configuración de Sesiones con almacenamiento persistente en MongoDB (7 días)
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'secreto',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
@@ -75,10 +88,12 @@ app.use(flash());
 
 // Middleware para inyectar variables globales disponibles en todas las vistas renderizadas por EJS
 app.use((req, res, next) => {
-    res.locals.success_msg = req.flash('success_msg');
-    res.locals.error_msg = req.flash('error_msg');
-    res.locals.error = req.flash('error'); // Errores generados internamente por Passport
-    res.locals.user = req.user || null;    // Objeto del usuario autenticado (si inició sesión)
+    const currentUser = req.user || (req.session && req.session.user) || null;
+    res.locals.user = currentUser;
+    res.locals.isAuthenticated = !!currentUser;
+    res.locals.success_msg = req.flash ? req.flash('success_msg') : null;
+    res.locals.error_msg = req.flash ? req.flash('error_msg') : null;
+    res.locals.error = req.flash ? req.flash('error') : null; // Errores generados internamente por Passport
     next();
 });
 

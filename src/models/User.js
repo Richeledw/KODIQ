@@ -65,6 +65,25 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    // Información de perfil complementaria
+    telefono: {
+        type: String,
+        default: ''
+    },
+    ciudad: {
+        type: String,
+        default: ''
+    },
+    bio: {
+        type: String,
+        default: ''
+    },
+    avatar: {
+        type: String,
+        default: '/img/default-avatar.svg'
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
     // Fecha de creación del registro del usuario
     creadoEn: {
         type: Date,

@@ -200,6 +200,40 @@ exports.editarCurso = async (req, res) => {
 };
 
 /**
+ * @route POST /docente/cursos/:id/eliminar
+ * @description Elimina un curso creado por el docente autenticado.
+ */
+exports.eliminarCurso = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const cleanId = (id || '').trim();
+
+        const curso = await Course.findOne({ id: cleanId });
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado o ya fue eliminado.');
+            return res.redirect('/docente/dashboard');
+        }
+
+        // Validar propiedad del curso (si no es admin)
+        if (req.user.rol !== 'admin' && curso.autor && curso.autor.toString() !== req.user._id.toString()) {
+            req.flash('error_msg', 'Solo puedes eliminar cursos creados por ti.');
+            return res.redirect('/docente/dashboard');
+        }
+
+        await Course.findOneAndDelete({ id: cleanId });
+        await Enrollment.deleteMany({ cursoId: cleanId });
+        await StudentProject.deleteMany({ cursoId: cleanId });
+
+        req.flash('success_msg', `Curso "${curso.titulo}" eliminado exitosamente.`);
+        res.redirect('/docente/dashboard');
+    } catch (err) {
+        console.error('Error al eliminar curso docente:', err);
+        req.flash('error_msg', 'Error al eliminar el curso: ' + err.message);
+        res.redirect('/docente/dashboard');
+    }
+};
+
+/**
  * @route GET /docente/cursos/:id/contenido
  * @description Constructor de contenido (módulos, lecciones, videos, explicaciones y recursos).
  */
@@ -379,15 +413,13 @@ exports.eliminarRecurso = async (req, res) => {
 exports.getProyectos = async (req, res) => {
     try {
         // Cursos del docente
-        const cursos = await Course.find({
-            $or: [
-                { autor: req.user._id },
-                { autorNombre: req.user.nombre }
-            ]
-        }).select('id titulo');
+        // Admin ve todos; docente solo los de cursos de los que es autor (por _id, no por nombre)
+        const filtroCursos = req.user.rol === 'admin' ? {} : { autor: req.user._id };
+        const cursos = await Course.find(filtroCursos).select('id titulo');
 
         const cursoIds = cursos.map(c => c.id);
-        const query = cursoIds.length > 0 ? { cursoId: { $in: cursoIds } } : {};
+        // Antes, sin cursos propios la consulta quedaba vacía ({}) y mostraba TODOS los proyectos
+        const query = { cursoId: { $in: cursoIds } };
 
         const proyectos = await StudentProject.find(query).sort({ actualizadoEn: -1 });
 
@@ -415,6 +447,15 @@ exports.retroalimentarProyecto = async (req, res) => {
         if (!proyecto) {
             req.flash('error_msg', 'Proyecto no encontrado.');
             return res.redirect('/docente/proyectos');
+        }
+
+        // Solo el autor del curso (o un admin) puede calificar el proyecto
+        if (req.user.rol !== 'admin') {
+            const curso = await Course.findOne({ id: proyecto.cursoId }).select('autor');
+            if (!curso || !curso.autor || curso.autor.toString() !== req.user._id.toString()) {
+                req.flash('error_msg', 'No tienes permiso para calificar este proyecto.');
+                return res.redirect('/docente/proyectos');
+            }
         }
 
         if (comentario && comentario.trim().length > 0) {

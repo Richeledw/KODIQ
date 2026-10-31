@@ -77,6 +77,10 @@ const StudentProjectSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    videoDemoUrl: {
+        type: String,
+        default: ''
+    },
     estado: {
         type: String,
         enum: ['En Progreso', 'En Revisión', 'Completado'],

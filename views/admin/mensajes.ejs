@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= titlePage %> - Eduplat</title>
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: var(--font-body); background: var(--canvas-bg); color: var(--brand-dark); min-height: 100vh; }
+        .main-content { margin-left: 260px; padding: 2rem; min-height: 100vh; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+        .topbar h1 { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: var(--brand-dark); margin: 0; }
+        
+        .stat-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .stat-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .table-container { background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); }
+        .tc-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .table thead th { background: #FAFAFB; color: #52525B; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border-subtle); padding: .85rem 1.25rem; }
+        .table tbody td { color: #3F3F46; border-bottom: 1px solid #F4F4F5; padding: .95rem 1.25rem; font-size: .88rem; vertical-align: middle; }
+        .row-unread { background-color: #F8FAFC !important; font-weight: 500; }
+        
+        @media (max-width: 991px) {
+            .main-content { margin-left: 0; padding: 1.25rem; }
+        }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
+</head>
+
+<body>
+    <!-- ── SIDEBAR ── -->
+    <%- include('../partials/admin-sidebar', { activeTab: 'mensajes' }) %>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-content">
+        <div class="topbar">
+            <div>
+                <h1>Bandeja de Mensajes de Soporte</h1>
+                <p class="text-muted small mb-0 font-mono">Panel de control • Consultas y formularios de contacto recibidos</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/contacto" target="_blank" class="btn btn-outline-secondary btn-sm fw-medium">
+                    <i class="fas fa-external-link-alt me-1"></i> Ver Formulario Público
+                </a>
+            </div>
+        </div>
+
+        <!-- Alertas Flash -->
+        <% if (locals.success_msg && locals.success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                <i class="fas fa-check-circle me-2 fs-5"></i>
+                <div><%= locals.success_msg %></div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <% if (locals.error_msg && locals.error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+                <div><%= locals.error_msg %></div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <!-- Métricas Rápidas -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted font-mono text-uppercase" style="font-size: 0.72rem;">Total Mensajes</div>
+                        <div class="h4 fw-bold font-heading mb-0 text-dark"><%= totalMensajes %></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted font-mono text-uppercase" style="font-size: 0.72rem;">Sin Leer</div>
+                        <div class="h4 fw-bold font-heading mb-0 text-dark"><%= mensajesNuevos %></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted font-mono text-uppercase" style="font-size: 0.72rem;">Leídos / Atendidos</div>
+                        <div class="h4 fw-bold font-heading mb-0 text-dark"><%= totalMensajes - mensajesNuevos %></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-dark bg-opacity-10 text-dark">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted font-mono text-uppercase" style="font-size: 0.72rem;">Canal Oficial</div>
+                        <div class="h6 fw-bold mb-0 text-dark text-truncate">contacto@eduplat.org</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Mensajes -->
+        <div class="table-container">
+            <div class="tc-header">
+                <div>
+                    <h5 class="fw-bold font-heading mb-0 text-dark">Bandeja de Entrada</h5>
+                    <small class="text-muted">Mensajes enviados a través del formulario de contacto</small>
+                </div>
+                <div>
+                    <input type="text" id="busquedaMensajes" class="form-control form-control-sm" placeholder="Buscar por remitente o asunto..." style="max-width: 260px;">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table mb-0" id="tablaMensajes">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Estado</th>
+                            <th>Remitente</th>
+                            <th>Asunto</th>
+                            <th>Fecha</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (mensajes && mensajes.length > 0) { %>
+                            <% mensajes.forEach(m => { %>
+                                <tr class="<%= !m.leido ? 'row-unread' : '' %>" data-filtro="<%= (m.nombre + ' ' + m.email + ' ' + m.asunto).toLowerCase() %>">
+                                    <td>
+                                        <% if (!m.leido) { %>
+                                            <span class="badge bg-warning text-dark font-mono" style="font-size: 0.72rem;">NUEVO</span>
+                                        <% } else { %>
+                                            <span class="badge bg-light text-muted border font-mono" style="font-size: 0.72rem;">LEÍDO</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark"><%= m.nombre %></div>
+                                        <div class="small font-mono text-muted"><%= m.email %></div>
+                                    </td>
+                                    <td>
+                                        <div class="text-dark fw-medium text-truncate" style="max-width: 320px;"><%= m.asunto %></div>
+                                        <small class="text-muted text-truncate d-block" style="max-width: 360px;"><%= m.mensaje %></small>
+                                    </td>
+                                    <td>
+                                        <span class="small font-mono text-muted">
+                                            <%= new Date(m.creadoEn).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <!-- Ver mensaje completo -->
+                                            <button 
+                                                type="button" 
+                                                class="btn btn-sm btn-outline-primary btn-ver-mensaje"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalMensaje"
+                                                data-id="<%= m._id %>"
+                                                data-nombre="<%= m.nombre %>"
+                                                data-email="<%= m.email %>"
+                                                data-asunto="<%= m.asunto %>"
+                                                data-mensaje="<%= m.mensaje %>"
+                                                data-fecha="<%= new Date(m.creadoEn).toLocaleString('es-ES') %>"
+                                                title="Ver Mensaje"
+                                            >
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <!-- Toggle leído -->
+                                            <form action="/admin/mensajes/<%= m._id %>/leido" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="<%= m.leido ? 'Marcar como no leído' : 'Marcar como leído' %>">
+                                                    <i class="fas <%= m.leido ? 'fa-envelope' : 'fa-envelope-open' %>"></i>
+                                                </button>
+                                            </form>
+
+                                            <!-- Eliminar -->
+                                            <form action="/admin/mensajes/<%= m._id %>/eliminar" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar este mensaje?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar mensaje">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 text-secondary opacity-50"></i>
+                                    <p class="mb-0 fw-medium">No hay mensajes de soporte recibidos aún.</p>
+                                    <small class="text-muted">Las consultas enviadas desde la página de contacto aparecerán aquí.</small>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Detalle del Mensaje -->
+    <div class="modal fade" id="modalMensaje" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-dark font-heading">
+                        <i class="fas fa-envelope-open-text me-2 text-primary"></i>Detalle de la Consulta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block font-mono">REMITENTE:</span>
+                                <strong class="text-dark" id="modalNombre"></strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block font-mono">CORREO:</span>
+                                <a href="#" id="modalEmail" class="text-primary font-mono text-decoration-none"></a>
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <span class="text-muted small d-block font-mono">ASUNTO:</span>
+                                <span class="text-dark fw-semibold" id="modalAsunto"></span>
+                            </div>
+                            <div class="col-sm-6 mt-2">
+                                <span class="text-muted small d-block font-mono">FECHA DE ENVÍO:</span>
+                                <span class="text-muted small font-mono" id="modalFecha"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="form-label fw-semibold text-dark small">Contenido del Mensaje:</label>
+                    <div class="p-3 bg-white rounded-3 border font-monospace small" id="modalContenido" style="white-space: pre-wrap; min-height: 140px; color: #18181B;"></div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <a href="#" id="modalResponderBtn" class="btn btn-primary fw-semibold btn-sm" style="background:var(--brand-primary);border:none;">
+                        <i class="fas fa-reply me-1"></i> Responder vía Email
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Modal de lectura de mensaje
+        document.querySelectorAll('.btn-ver-mensaje').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const nombre = this.getAttribute('data-nombre');
+                const email = this.getAttribute('data-email');
+                const asunto = this.getAttribute('data-asunto');
+                const mensaje = this.getAttribute('data-mensaje');
+                const fecha = this.getAttribute('data-fecha');
+
+                document.getElementById('modalNombre').textContent = nombre;
+                const emailEl = document.getElementById('modalEmail');
+                emailEl.textContent = email;
+                emailEl.href = `mailto:${email}?subject=Re: ${encodeURIComponent(asunto)}`;
+                document.getElementById('modalAsunto').textContent = asunto;
+                document.getElementById('modalFecha').textContent = fecha;
+                document.getElementById('modalContenido').textContent = mensaje;
+                document.getElementById('modalResponderBtn').href = `mailto:${email}?subject=Re: ${encodeURIComponent(asunto)}`;
+            });
+        });
+
+        // Filtro de búsqueda en vivo
+        const searchInput = document.getElementById('busquedaMensajes');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const query = this.value.toLowerCase().trim();
+                const rows = document.querySelectorAll('#tablaMensajes tbody tr[data-filtro]');
+                rows.forEach(r => {
+                    const data = r.getAttribute('data-filtro') || '';
+                    r.style.display = data.includes(query) ? '' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

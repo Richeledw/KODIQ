@@ -12,34 +12,34 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..600;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
 
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #1f2937; min-height: 100vh; }
-        .sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e5e7eb; min-height: 100vh; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100; }
+        body { font-family: var(--font-body); background: var(--canvas-bg); color: var(--brand-dark); min-height: 100vh; }
+        .sidebar { width: 260px; background: #ffffff; border-right: 1px solid var(--border-subtle); min-height: 100vh; padding: 1.5rem 1rem; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100; }
         .sidebar-brand { display: flex; align-items: center; gap: .75rem; padding: .5rem .5rem 1.25rem; border-bottom: 1px solid #f3f4f6; margin-bottom: 1.25rem; text-decoration: none; }
-        .sidebar-brand .brand-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25); }
+        .sidebar-brand .brand-icon { width: 40px; height: 40px; background: var(--brand-dark); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); }
         .sidebar-brand span { color: #111827; font-weight: 700; font-size: 1.15rem; }
         .sidebar-brand small { color: #6b7280; font-size: .75rem; display: block; font-weight: 500; }
         .nav-section-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #9ca3af; padding: 0 .75rem; margin: .75rem 0 .35rem; }
         .sidebar .nav-link { display: flex; align-items: center; gap: .75rem; padding: .65rem .75rem; border-radius: 8px; color: #4b5563; font-size: .88rem; font-weight: 500; text-decoration: none; margin-bottom: .2rem; transition: all .2s ease; }
-        .sidebar .nav-link:hover { background: #f3f4f6; color: #059669; }
-        .sidebar .nav-link.active { background: #ecfdf5; color: #059669; font-weight: 600; border-left: 3px solid #10b981; }
+        .sidebar .nav-link:hover { background: #f3f4f6; color: #1d4ed8; }
+        .sidebar .nav-link.active { background: #eff6ff; color: #1d4ed8; font-weight: 600; border-left: 3px solid #3b82f6; }
         .sidebar .nav-link i { width: 18px; text-align: center; }
         .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
-        .sidebar-footer .user-info { padding: .5rem; background: #f9fafb; border-radius: 8px; margin-bottom: .5rem; }
+        .sidebar-footer .user-info { padding: .5rem; background: var(--canvas-bg); border-radius: 8px; margin-bottom: .5rem; }
 
         .main-content { margin-left: 260px; padding: 2rem; min-height: 100vh; }
         .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
         .topbar h1 { font-size: 1.6rem; font-weight: 700; color: #111827; margin: 0; }
         .breadcrumb { font-size: .85rem; color: #6b7280; margin: 0; }
-        .breadcrumb span.active { color: #059669; font-weight: 600; }
+        .breadcrumb span.active { color: #1d4ed8; font-weight: 600; }
 
         .stat-card {
             background: #ffffff;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-subtle);
             border-radius: 14px;
             padding: 1.4rem 1.5rem;
             display: flex;
@@ -50,7 +50,7 @@
         }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
         .stat-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; }
-        .stat-icon.green  { background: #ecfdf5; color: #059669; }
+        .stat-icon.blue  { background: #eff6ff; color: #1d4ed8; }
         .stat-icon.blue   { background: #eff6ff; color: #2563eb; }
         .stat-icon.violet { background: #f5f3ff; color: #7c3aed; }
         .stat-icon.amber  { background: #fffbeb; color: #d97706; }
@@ -60,7 +60,7 @@
 
         .course-card {
             background: #ffffff;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-subtle);
             border-radius: 14px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -70,12 +70,14 @@
             height: 100%;
         }
         .course-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
-        .cac-header { height: 95px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; position: relative; }
+        .cac-header { height: 95px; background: var(--brand-dark); display: flex; align-items: center; justify-content: center; position: relative; }
         .cac-header img { width: 48px; height: 48px; object-fit: contain; filter: brightness(0) invert(1); }
         .cac-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
         .cac-title { font-weight: 700; color: #111827; font-size: 1.05rem; margin-bottom: .35rem; }
         .cac-desc { color: #6b7280; font-size: .83rem; line-height: 1.45; margin-bottom: .85rem; flex: 1; }
     </style>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
 </head>
 
 <body>
@@ -88,16 +90,16 @@
         <!-- Topbar -->
         <div class="topbar">
             <div>
-                <h1><i class="fas fa-chalkboard-teacher me-2 text-success"></i><%= titlePage %></h1>
+                <h1><i class="fas fa-chalkboard-teacher me-2 text-primary"></i><%= titlePage %></h1>
                 <nav class="breadcrumb mt-1">
                     <span>Eduplat</span> &nbsp;/&nbsp; <span class="active">Panel de Docente</span>
                 </nav>
             </div>
             <div class="d-flex gap-2">
-                <a href="/docente/cursos/nuevo" class="btn btn-success fw-semibold px-3 py-2 shadow-sm" style="background:linear-gradient(135deg,#10b981,#059669);border:none;">
+                <a href="/docente/cursos/nuevo" class="btn btn-primary fw-semibold px-3 py-2 shadow-sm" style="background: var(--brand-dark);border:none;">
                     <i class="fas fa-plus-circle me-1"></i> Publicar Nuevo Curso
                 </a>
-                <a href="/docente/proyectos" class="btn btn-outline-success fw-semibold px-3 py-2">
+                <a href="/docente/proyectos" class="btn btn-outline-primary fw-semibold px-3 py-2">
                     <i class="fas fa-laptop-code me-1"></i> Revisar Proyectos
                 </a>
             </div>
@@ -121,7 +123,7 @@
         <div class="row g-3 mb-4">
             <div class="col-sm-6 col-xl-4">
                 <div class="stat-card">
-                    <div class="stat-icon green"><i class="fas fa-book-open"></i></div>
+                    <div class="stat-icon blue"><i class="fas fa-book-open"></i></div>
                     <div>
                         <div class="stat-value"><%= locals.totalCursosPropios !== undefined ? totalCursosPropios : listaCursos.length %></div>
                         <div class="stat-label">Cursos Asignados</div>
@@ -150,7 +152,7 @@
 
         <!-- ── Lista de Cursos del Docente ── -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-dark mb-0"><i class="fas fa-layer-group text-success me-2"></i>Mis Cursos Activos</h4>
+            <h4 class="fw-bold text-dark mb-0"><i class="fas fa-layer-group text-primary me-2"></i>Mis Cursos Activos</h4>
             <span class="badge bg-light text-muted border px-2 py-1"><%= listaCursos.length %> cursos</span>
         </div>
 
@@ -170,22 +172,31 @@
                                 <p class="cac-desc"><%= curso.descripcion %></p>
 
                                 <div class="d-flex align-items-center justify-content-between text-muted small mb-3 pt-2 border-top">
-                                    <span><i class="fas fa-signal me-1 text-success"></i><%= curso.nivel %></span>
+                                    <span><i class="fas fa-signal me-1 text-primary"></i><%= curso.nivel %></span>
                                     <span><i class="fas fa-clock me-1 text-primary"></i><%= curso.duracion %></span>
                                     <span><i class="fas fa-list-ol me-1 text-info"></i><%= curso.modulos ? curso.modulos.length : 0 %> mód.</span>
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <a href="/docente/cursos/<%= curso.id %>/contenido" class="btn btn-sm btn-primary fw-semibold" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;">
+                                    <a href="/docente/cursos/<%= curso.id %>/contenido" class="btn btn-sm btn-primary fw-semibold" style="background: var(--brand-dark);border:none;">
                                         <i class="fas fa-tools me-1"></i> Constructor de Contenido
                                     </a>
                                     <div class="d-flex gap-2">
-                                        <a href="/docente/cursos/<%= curso.id %>/editar" class="btn btn-sm btn-outline-secondary w-50">
+                                        <a href="/docente/cursos/<%= curso.id %>/editar" class="btn btn-sm btn-outline-secondary flex-grow-1" title="Editar detalles">
                                             <i class="fas fa-edit me-1"></i> Editar
                                         </a>
-                                        <a href="/curso/<%= curso.id %>/aula" target="_blank" class="btn btn-sm btn-outline-success w-50">
+                                        <a href="/curso/<%= curso.id %>/aula" target="_blank" class="btn btn-sm btn-outline-success flex-grow-1" title="Ver aula virtual">
                                             <i class="fas fa-play-circle me-1"></i> Ver Aula
                                         </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                title="Eliminar curso"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalConfirmarEliminarCursoDocente"
+                                                data-curso-id="<%= curso.id %>"
+                                                data-curso-titulo="<%= curso.titulo %>">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -198,7 +209,7 @@
                 <i class="fas fa-book-reader fa-3x text-muted mb-3"></i>
                 <h5>No tienes cursos registrados aún</h5>
                 <p class="text-muted">Comienza publicando tu primer curso en Eduplat para compartir tus conocimientos con estudiantes.</p>
-                <a href="/docente/cursos/nuevo" class="btn btn-success fw-semibold mt-2">
+                <a href="/docente/cursos/nuevo" class="btn btn-primary fw-semibold mt-2">
                     <i class="fas fa-plus-circle me-1"></i> Publicar Mi Primer Curso
                 </a>
             </div>
@@ -206,7 +217,54 @@
 
     </main>
 
+    <!-- Modal Confirmar Eliminación de Curso para Docente -->
+    <div class="modal fade" id="modalConfirmarEliminarCursoDocente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger bg-opacity-10 border-bottom border-danger-subtle">
+                    <h5 class="modal-title fw-bold text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación de Curso
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="formConfirmarEliminarCursoDocente" method="POST">
+                    <div class="modal-body text-center py-4">
+                        <div style="width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1rem;">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">¿Estás seguro de eliminar este curso?</h5>
+                        <p class="text-muted small mb-3">
+                            Vas a eliminar el curso <strong class="text-dark" id="docente-eliminar-curso-titulo"></strong>.
+                        </p>
+                        <div class="alert alert-warning py-2 px-3 small text-start mb-0">
+                            <i class="fas fa-info-circle me-1"></i> Se desvincularán todas las lecciones, recursos y progresos de los estudiantes inscritos.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top justify-content-center gap-2">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger px-4 fw-semibold shadow-sm">
+                            <i class="fas fa-trash-alt me-1"></i> Aceptar y Eliminar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const modalConfirmarEliminarCursoDocente = document.getElementById('modalConfirmarEliminarCursoDocente');
+        if (modalConfirmarEliminarCursoDocente) {
+            modalConfirmarEliminarCursoDocente.addEventListener('show.bs.modal', (event) => {
+                const btn = event.relatedTarget;
+                const cursoId = btn.dataset.cursoId;
+                const cursoTitulo = btn.dataset.cursoTitulo;
+
+                document.getElementById('docente-eliminar-curso-titulo').textContent = cursoTitulo;
+                document.getElementById('formConfirmarEliminarCursoDocente').action = `/docente/cursos/${cursoId}/eliminar`;
+            });
+        }
+    </script>
 </body>
 
 </html>

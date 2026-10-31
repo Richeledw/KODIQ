@@ -1,51 +1,64 @@
-<!-- Sidebar de Administración EduPlat -->
+<!-- Sidebar de Administración EduPlat — Technical Studio Edition -->
 <aside class="sidebar">
     <a class="sidebar-brand" href="/admin/dashboard">
-        <div class="brand-icon"><i class="fas fa-book-open"></i></div>
+        <div class="brand-icon">
+            <i class="fas fa-terminal"></i>
+        </div>
         <div>
-            <span>Eduplat</span>
-            <small>Panel Administrador</small>
+            <span class="brand-name">Eduplat</span>
+            <small class="brand-sub">Panel Administrador</small>
         </div>
     </a>
 
     <p class="nav-section-label">Principal</p>
     <a href="/admin/dashboard" class="nav-link <%= (locals.activeTab === 'dashboard') ? 'active' : '' %>">
-        <i class="fas fa-chart-pie"></i> Dashboard
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard</span>
     </a>
 
     <p class="nav-section-label">Gestión de Plataforma</p>
     <a href="/admin/usuarios" class="nav-link <%= (locals.activeTab === 'usuarios') ? 'active' : '' %>">
-        <i class="fas fa-users"></i> Gestión Usuarios
+        <i class="fas fa-users"></i>
+        <span>Gestión Usuarios</span>
     </a>
     <a href="/admin/cursos" class="nav-link <%= (locals.activeTab === 'cursos') ? 'active' : '' %>">
-        <i class="fas fa-graduation-cap"></i> Gestión Cursos
+        <i class="fas fa-graduation-cap"></i>
+        <span>Gestión Cursos</span>
     </a>
     <a href="/admin/proyectos" class="nav-link <%= (locals.activeTab === 'proyectos') ? 'active' : '' %>">
-        <i class="fas fa-laptop-code"></i> Proyectos Prácticos
+        <i class="fas fa-laptop-code"></i>
+        <span>Proyectos Prácticos</span>
+    </a>
+    <a href="/admin/mensajes" class="nav-link <%= (locals.activeTab === 'mensajes') ? 'active' : '' %>">
+        <i class="fas fa-envelope-open-text"></i>
+        <span>Mensajes Soporte</span>
     </a>
 
     <p class="nav-section-label">Accesos Directos</p>
     <a href="/temas" class="nav-link">
-        <i class="fas fa-globe"></i> Ver Catálogo
+        <i class="fas fa-globe"></i>
+        <span>Ver Catálogo</span>
     </a>
     <a href="/panel" class="nav-link">
-        <i class="fas fa-user-graduate"></i> Mi Panel Estudiante
+        <i class="fas fa-user-graduate"></i>
+        <span>Mi Panel Estudiante</span>
     </a>
 
     <div class="sidebar-footer">
         <div class="user-info d-flex align-items-center gap-2">
-            <div style="width:36px;height:36px;background:#f5f3ff;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#7c3aed;font-size:.9rem;font-weight:600;">
+            <div class="user-avatar-badge" style="width:34px;height:34px;background:var(--brand-dark);color:white;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;font-family:var(--font-mono);">
                 <i class="fas fa-user-shield"></i>
             </div>
-            <div style="min-width:0;">
-                <div style="font-size:.85rem;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <div style="min-width:0;" class="flex-grow-1">
+                <div class="text-truncate user-display-name fw-semibold text-dark" style="font-size:.85rem;">
                     <%= locals.user ? user.nombre : 'Admin' %>
                 </div>
-                <div style="font-size:.74rem;color:#6b7280;">Administrador</div>
+                <div class="font-mono text-muted" style="font-size:.72rem;">Administrador</div>
             </div>
         </div>
-        <a href="/logout" class="nav-link" style="color:#ef4444;">
-            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        <a href="/logout" class="nav-link text-danger mt-1 btn-logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar sesión</span>
         </a>
     </div>
 </aside>

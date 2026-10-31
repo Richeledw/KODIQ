@@ -5,10 +5,12 @@
  * gestión de recursos y contenido (módulos, lecciones, archivos adjuntos) y revisión de proyectos prácticos.
  */
 
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Course = require('../models/Course');
 const StudentProject = require('../models/StudentProject');
 const Enrollment = require('../models/Enrollment');
+const ContactMessage = require('../models/ContactMessage');
 
 /**
  * @route GET /admin/dashboard
@@ -159,20 +161,30 @@ exports.eliminarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
 
-        if (req.user && req.user._id.toString() === id) {
+        if (req.user && req.user._id && req.user._id.toString() === id.toString()) {
             req.flash('error_msg', 'No puedes eliminar tu propia cuenta de administrador.');
             return res.redirect('/admin/usuarios');
         }
 
-        await User.findByIdAndDelete(id);
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            req.flash('error_msg', 'El identificador de usuario no es válido.');
+            return res.redirect('/admin/usuarios');
+        }
+
+        const usuarioEliminado = await User.findByIdAndDelete(id);
+        if (!usuarioEliminado) {
+            req.flash('error_msg', 'El usuario no existe o ya fue eliminado previamente.');
+            return res.redirect('/admin/usuarios');
+        }
+
         await Enrollment.deleteMany({ estudiante: id });
         await StudentProject.deleteMany({ estudiante: id });
 
-        req.flash('success_msg', 'Usuario y sus registros asociados eliminados.');
+        req.flash('success_msg', `Usuario "${usuarioEliminado.nombre}" (${usuarioEliminado.email}) eliminado correctamente.`);
         res.redirect('/admin/usuarios');
     } catch (err) {
         console.error('Error al eliminar usuario:', err);
-        req.flash('error_msg', 'Error al eliminar usuario.');
+        req.flash('error_msg', 'Error al procesar la eliminación del usuario: ' + err.message);
         res.redirect('/admin/usuarios');
     }
 };
@@ -305,14 +317,28 @@ exports.editarCurso = async (req, res) => {
 exports.eliminarCurso = async (req, res) => {
     try {
         const { id } = req.params;
-        await Course.findOneAndDelete({ id });
-        await Enrollment.deleteMany({ cursoId: id });
+        const cleanId = (id || '').trim();
 
-        req.flash('success_msg', `Curso "${id}" eliminado exitosamente de la plataforma.`);
+        // Buscar y eliminar por slug 'id' o por '_id' de MongoDB
+        let cursoEliminado = await Course.findOneAndDelete({ id: cleanId });
+        if (!cursoEliminado && mongoose.Types.ObjectId.isValid(cleanId)) {
+            cursoEliminado = await Course.findByIdAndDelete(cleanId);
+        }
+
+        if (!cursoEliminado) {
+            req.flash('error_msg', 'El curso no existe o ya fue eliminado.');
+            return res.redirect('/admin/cursos');
+        }
+
+        const cursoSlug = cursoEliminado.id || cleanId;
+        await Enrollment.deleteMany({ cursoId: cursoSlug });
+        await StudentProject.deleteMany({ cursoId: cursoSlug });
+
+        req.flash('success_msg', `Curso "${cursoEliminado.titulo}" eliminado exitosamente de la plataforma.`);
         res.redirect('/admin/cursos');
     } catch (err) {
         console.error('Error al eliminar curso:', err);
-        req.flash('error_msg', 'Error al eliminar el curso.');
+        req.flash('error_msg', 'Error al eliminar el curso: ' + err.message);
         res.redirect('/admin/cursos');
     }
 };
@@ -557,5 +583,65 @@ exports.retroalimentarProyecto = async (req, res) => {
         console.error('Error al retroalimentar proyecto:', err);
         req.flash('error_msg', 'Error al guardar la retroalimentación.');
         res.redirect('/admin/proyectos');
+    }
+};
+
+/**
+ * @route GET /admin/mensajes
+ * @description Listado de mensajes de contacto y soporte recibidos.
+ */
+exports.getMensajes = async (req, res) => {
+    try {
+        const mensajes = await ContactMessage.find().sort({ creadoEn: -1 });
+        const totalMensajes = mensajes.length;
+        const mensajesNuevos = mensajes.filter(m => !m.leido).length;
+
+        res.render('admin/mensajes', {
+            titlePage: 'Mensajes de Soporte y Contacto',
+            mensajes,
+            totalMensajes,
+            mensajesNuevos
+        });
+    } catch (err) {
+        console.error('Error al listar mensajes de contacto:', err);
+        res.status(500).send('Error al cargar mensajes');
+    }
+};
+
+/**
+ * @route POST /admin/mensajes/:id/leido
+ * @description Alterna el estado de lectura de un mensaje de contacto.
+ */
+exports.postMarcarLeidoMensaje = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const mensaje = await ContactMessage.findById(id);
+        if (mensaje) {
+            mensaje.leido = !mensaje.leido;
+            await mensaje.save();
+            req.flash('success_msg', mensaje.leido ? 'Mensaje marcado como leído.' : 'Mensaje marcado como no leído.');
+        }
+        res.redirect('/admin/mensajes');
+    } catch (err) {
+        console.error('Error al actualizar estado del mensaje:', err);
+        req.flash('error_msg', 'No se pudo actualizar el estado del mensaje.');
+        res.redirect('/admin/mensajes');
+    }
+};
+
+/**
+ * @route POST /admin/mensajes/:id/eliminar
+ * @description Elimina un mensaje de contacto.
+ */
+exports.postEliminarMensaje = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await ContactMessage.findByIdAndDelete(id);
+        req.flash('success_msg', 'Mensaje eliminado correctamente.');
+        res.redirect('/admin/mensajes');
+    } catch (err) {
+        console.error('Error al eliminar mensaje de contacto:', err);
+        req.flash('error_msg', 'No se pudo eliminar el mensaje.');
+        res.redirect('/admin/mensajes');
     }
 };

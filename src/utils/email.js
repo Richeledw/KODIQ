@@ -1,49 +1,89 @@
-/**
- * @file email.js
- * @description Utilidad de envío de correos electrónicos utilizando Nodemailer.
- * Se encarga de enviar correos informativos como el de bienvenida al registrarse.
- */
-
 const nodemailer = require('nodemailer');
 
 /**
  * @function sendEmail
  * @async
  * @description Crea una conexión con el servidor SMTP y envía un correo electrónico.
+ * Compatible con Gmail (App Passwords), Mailtrap, Ethereal o SMTP personalizado.
  * @param {object} options - Opciones de envío.
  * @param {string} options.email - Destinatario del correo.
  * @param {string} options.subject - Asunto del correo.
  * @param {string} options.message - Mensaje en formato texto plano.
  * @param {string} options.html - Mensaje en formato HTML para mejor diseño visual.
+ * @returns {Promise<{success: boolean, previewUrl?: string, error?: string}>}
  */
 const sendEmail = async (options) => {
     try {
-        // Configuramos el transporte SMTP para enviar los correos electrónicos.
-        // Utiliza variables de entorno o cae de vuelta a la configuración de Ethereal SMTP.
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-            port: process.env.SMTP_PORT || 587,
-            secure: false, // true para puerto 465, false para otros como 587 o 25
-            auth: {
-                user: process.env.SMTP_EMAIL || 'user',
-                pass: process.env.SMTP_PASSWORD || 'pass'
-            }
-        });
+        const host = (process.env.SMTP_HOST || '').trim().toLowerCase();
+        const user = (process.env.SMTP_EMAIL || '').trim();
+        const pass = (process.env.SMTP_PASSWORD || '').trim();
+        const port = Number(process.env.SMTP_PORT) || 587;
+        const fromEmail = process.env.SMTP_FROM_EMAIL || user || 'noreply@eduplat.com';
+
+        // Detectar si las credenciales son de prueba/falsas
+        const isPlaceholder = !user || user.includes('tu_usuario') || !pass || pass.includes('tu_password');
+
+        let transporter;
+
+        if (isPlaceholder) {
+            console.warn('[EMAIL WARNING]: Credenciales SMTP sin configurar en .env (detectado placeholder). Generando cuenta de pruebas en Ethereal...');
+            const testAccount = await nodemailer.createTestAccount();
+            transporter = nodemailer.createTransport({
+                host: 'smtp.ethereal.email',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: testAccount.user,
+                    pass: testAccount.pass
+                }
+            });
+        } else if (host.includes('gmail') || user.endsWith('@gmail.com')) {
+            // Configuración optimizada para Gmail
+            transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: user,
+                    pass: pass // Contraseña de aplicación de 16 caracteres de Google
+                }
+            });
+        } else {
+            // SMTP genérico (Mailtrap, SendGrid, Amazon SES, etc.)
+            transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: port,
+                secure: port === 465,
+                auth: {
+                    user: user,
+                    pass: pass
+                },
+                tls: {
+                    rejectUnauthorized: false
+                }
+            });
+        }
 
         // Especificamos el contenido y los metadatos del correo electrónico
         const info = await transporter.sendMail({
-            from: `"Eduplat Team" <${process.env.SMTP_FROM_EMAIL || 'noreply@eduplat.com'}>`, // Remitente
-            to: options.email,                                                               // Destinatario
-            subject: options.subject,                                                         // Asunto
-            text: options.message,                                                            // Cuerpo de texto plano
-            html: options.html                                                                // Cuerpo en formato HTML
+            from: `"Eduplat Team" <${fromEmail}>`,
+            to: options.email,
+            subject: options.subject,
+            text: options.message,
+            html: options.html
         });
 
-        console.log("Mensaje enviado exitosamente. ID del mensaje: %s", info.messageId);
+        console.log(`[EMAIL ENVIADO]: Para: ${options.email} | MessageId: ${info.messageId}`);
+
+        let previewUrl = null;
+        if (isPlaceholder) {
+            previewUrl = nodemailer.getTestMessageUrl(info);
+            console.log(`[ETHEREAL PREVIEW LINK]: ${previewUrl}`);
+        }
+
+        return { success: true, messageId: info.messageId, previewUrl };
     } catch (error) {
-        console.error("Error al intentar enviar el email: ", error);
+        console.error('[EMAIL ERROR]: Error al intentar enviar el email:', error.message);
+        return { success: false, error: error.message };
     }
 };
 
-// Exportamos la función de envío de correos
 module.exports = sendEmail;

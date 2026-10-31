@@ -40,4 +40,9 @@ router.post('/admin/cursos/:id/recurso/:rId/eliminar', adminController.eliminarR
 router.get('/admin/proyectos', adminController.getProyectos);
 router.post('/admin/proyectos/:id/retroalimentar', adminController.retroalimentarProyecto);
 
+// ── Mensajes de Soporte y Contacto ──
+router.get('/admin/mensajes', adminController.getMensajes);
+router.post('/admin/mensajes/:id/leido', adminController.postMarcarLeidoMensaje);
+router.post('/admin/mensajes/:id/eliminar', adminController.postEliminarMensaje);
+
 module.exports = router;

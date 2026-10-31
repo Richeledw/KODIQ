@@ -63,6 +63,25 @@ const LessonSchema = new mongoose.Schema({
     }
 });
 
+const QuizQuestionSchema = new mongoose.Schema({
+    pregunta: {
+        type: String,
+        required: true
+    },
+    opciones: [{
+        type: String,
+        required: true
+    }],
+    respuestaCorrecta: {
+        type: Number,
+        required: true
+    },
+    explicacion: {
+        type: String,
+        default: ''
+    }
+});
+
 const ModuleSchema = new mongoose.Schema({
     titulo: {
         type: String,
@@ -76,7 +95,8 @@ const ModuleSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
-    lecciones: [LessonSchema]
+    lecciones: [LessonSchema],
+    quiz: [QuizQuestionSchema]
 });
 
 const CourseSchema = new mongoose.Schema({

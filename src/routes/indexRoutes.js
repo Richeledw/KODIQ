@@ -18,4 +18,7 @@ router.get('/contacto', indexController.getContacto);
 // Ruta para procesar el envío del formulario de contacto (5 mensajes por hora e IP)
 router.post('/contacto', contactLimiter, validarContacto, indexController.postContacto);
 
+// Mapa del sitio XML para indexación SEO
+router.get('/sitemap.xml', indexController.getSitemap);
+
 module.exports = router;

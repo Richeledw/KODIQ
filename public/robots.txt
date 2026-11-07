@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /docente/
+Disallow: /panel/
+Disallow: /configuracion/
+Disallow: /uploads/
+Allow: /
+Allow: /temas
+Allow: /curso/
+Allow: /contacto
+Allow: /login
+Allow: /registro
+
+Sitemap: http://localhost:3000/sitemap.xml

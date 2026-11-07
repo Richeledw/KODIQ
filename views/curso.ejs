@@ -5,11 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= datosCurso.titulo %> — Eduplat</title>
     <meta name="description" content="<%= datosCurso.descripcion %>">
-    
-    <!-- Bootstrap 5 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome 6 CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="canonical" href="http://localhost:3000/curso/<%= datosCurso.id %>">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="http://localhost:3000/curso/<%= datosCurso.id %>">
+    <meta property="og:title" content="<%= datosCurso.titulo %> — Eduplat">
+    <meta property="og:description" content="<%= datosCurso.descripcion %>">
+    <meta property="og:image" content="<%= datosCurso.icono || '/favicon.svg' %>">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= datosCurso.titulo %> — Eduplat">
+    <meta name="twitter:description" content="<%= datosCurso.descripcion %>">
+    <meta name="twitter:image" content="<%= datosCurso.icono || '/favicon.svg' %>">
+
+    <!-- PWA Web Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest">
+
+    <!-- JSON-LD Structured Data: Course -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": <%- JSON.stringify(datosCurso.titulo) %>,
+      "description": <%- JSON.stringify(datosCurso.descripcion) %>,
+      "provider": {
+        "@type": "Organization",
+        "name": "Eduplat",
+        "sameAs": "http://localhost:3000"
+      },
+      "educationalLevel": "<%= datosCurso.nivel || 'Beginner' %>",
+      "timeRequired": "<%= datosCurso.duracion || '10 horas' %>"
+    }
+    </script>
+
+    <!-- Bootstrap 5 CDN con SRI -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- Font Awesome 6 CDN con SRI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,7 +173,7 @@
     <!-- Navbar Oficial -->
     <%- include('partials/navbar') %>
 
-    <main>
+    <main id="main-content">
         <!-- Hero Header Espacioso y Limpio -->
         <section class="course-hero">
             <div class="container">
@@ -411,7 +445,8 @@
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap 5 JS con SRI y defer -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous" defer></script>
+    <%- include('partials/sw-register') %>
 </body>
 </html>

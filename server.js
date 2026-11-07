@@ -71,15 +71,20 @@ connectDB();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Servir archivos estáticos desde /public con cabeceras nosniff y aislamiento CSP para /uploads
+// Servir archivos estáticos desde /public con cabeceras nosniff, caché optimizado y aislamiento CSP para /uploads
 app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: isProduction ? '7d' : 0,
     setHeaders: (res, filePath) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
         if (filePath.endsWith('.svg')) {
             res.type('image/svg+xml');
         }
+        if (filePath.endsWith('.webmanifest')) {
+            res.type('application/manifest+json');
+        }
         if (filePath.includes(`${path.sep}uploads${path.sep}`)) {
             res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
+            res.setHeader('Cache-Control', 'no-store, max-age=0');
         }
     }
 }));

@@ -114,3 +114,41 @@ exports.postContacto = async (req, res) => {
         });
     }
 };
+
+/**
+ * @route GET /sitemap.xml
+ * @description Genera dinámicamente el mapa del sitio XML con cursos publicados para indexación SEO.
+ */
+exports.getSitemap = async (req, res) => {
+    try {
+        const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+        const cursos = await Course.find({ publicado: true }).select('id actualizadoEn creadoEn');
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+        const paginasFijas = [
+            { path: '/', priority: '1.0', changefreq: 'daily' },
+            { path: '/temas', priority: '0.9', changefreq: 'daily' },
+            { path: '/contacto', priority: '0.5', changefreq: 'monthly' },
+            { path: '/login', priority: '0.4', changefreq: 'monthly' },
+            { path: '/registro', priority: '0.6', changefreq: 'monthly' }
+        ];
+
+        for (const p of paginasFijas) {
+            xml += `  <url>\n    <loc>${appUrl}${p.path}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
+        }
+
+        for (const c of cursos) {
+            const fecha = (c.actualizadoEn || c.creadoEn || new Date()).toISOString().split('T')[0];
+            xml += `  <url>\n    <loc>${appUrl}/curso/${c.id}</loc>\n    <lastmod>${fecha}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+        }
+
+        xml += '</urlset>';
+
+        res.header('Content-Type', 'application/xml');
+        res.send(xml);
+    } catch (err) {
+        res.status(500).end();
+    }
+};

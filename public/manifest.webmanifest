@@ -1,0 +1,21 @@
+{
+  "name": "Eduplat - Plataforma de Aprendizaje en Línea",
+  "short_name": "Eduplat",
+  "description": "Aprende programación, desarrollo web y bases de datos con cursos prácticos y certificados oficiales.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090D16",
+  "theme_color": "#090D16",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48 32x32 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

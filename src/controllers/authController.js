@@ -118,7 +118,11 @@ exports.postRegistro = async (req, res) => {
 
     } catch (err) {
         console.error('Error en el registro del usuario:', err);
-        res.status(500).send('Error en el servidor');
+        res.status(500).render('error', {
+            mensaje: 'Error en el servidor',
+            descripcion: 'No se pudo completar el registro debido a un error interno.',
+            status: 500
+        });
     }
 };
 

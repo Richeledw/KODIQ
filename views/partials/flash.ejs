@@ -1,0 +1,33 @@
+<%# Componente reutilizable para mensajes flash (notificaciones, avisos de error y éxito) %>
+<% if (locals.success_msg && (Array.isArray(locals.success_msg) ? locals.success_msg.length > 0 : locals.success_msg)) { %>
+    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" aria-live="polite">
+        <i class="fas fa-check-circle me-2 fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">
+            <%= Array.isArray(locals.success_msg) ? locals.success_msg.join(' ') : locals.success_msg %>
+            <% if (locals.reset_preview_url) { %>
+                <a href="<%= locals.reset_preview_url %>" target="_blank" rel="noopener" class="fw-bold text-dark text-decoration-underline ms-1">Abrir correo de prueba</a>
+            <% } %>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+<% } %>
+
+<% if (locals.error_msg && (Array.isArray(locals.error_msg) ? locals.error_msg.length > 0 : locals.error_msg)) { %>
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" aria-live="assertive">
+        <i class="fas fa-exclamation-circle me-2 fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">
+            <%= Array.isArray(locals.error_msg) ? locals.error_msg.join(' ') : locals.error_msg %>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+<% } %>
+
+<% if (locals.error && (Array.isArray(locals.error) ? locals.error.length > 0 : locals.error)) { %>
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" aria-live="assertive">
+        <i class="fas fa-exclamation-triangle me-2 fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">
+            <%= Array.isArray(locals.error) ? locals.error.join(' ') : locals.error %>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+<% } %>

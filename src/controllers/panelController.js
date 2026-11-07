@@ -103,7 +103,11 @@ exports.getPanel = async (req, res) => {
 
     } catch (err) {
         console.error('Error al cargar panel de estudiante:', err);
-        res.status(500).send('Error interno del servidor al procesar el panel');
+        res.status(500).render('error', {
+            mensaje: 'Error interno del servidor',
+            descripcion: 'Ocurrió un error inesperado al procesar el panel.',
+            status: 500
+        });
     }
 };
 
@@ -120,7 +124,11 @@ exports.getConfiguracion = async (req, res) => {
         });
     } catch (err) {
         console.error('Error al cargar configuración del usuario:', err);
-        res.status(500).send('Error interno del servidor al procesar la configuración');
+        res.status(500).render('error', {
+            mensaje: 'Error interno del servidor',
+            descripcion: 'Ocurrió un error inesperado al procesar la configuración.',
+            status: 500
+        });
     }
 };
 

@@ -1,0 +1,10 @@
+<%# Registro unificado del Service Worker para soporte PWA y modo offline %>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/js/sw.js').catch((err) => {
+                // Falla silenciosa en desarrollo si el certificado o ruta no aplica
+            });
+        });
+    }
+</script>

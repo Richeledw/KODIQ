@@ -115,7 +115,7 @@
 <!-- Script para sincronizar persistencia de sesión en localStorage -->
 <script>
     <% const usuarioSeguro = locals.user ? { id: user._id, nombre: user.nombre, email: user.email, rol: user.rol } : null; %>
-    <%-- SEGURIDAD: escapamos <, > y & para que el JSON no pueda cerrar el <script>. --%>
+    <%# SEGURIDAD: escapamos <, > y & para que el JSON no pueda cerrar el <script>. %>
     window.EDUPLAT_USER = <%- JSON.stringify(usuarioSeguro).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026') %>;
 </script>
 <script src="/js/navbar-auth.js"></script>

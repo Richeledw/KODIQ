@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const cursoController = require('../controllers/cursoController');
 const { isAuth } = require('../middlewares/auth');
+const { validarProyecto } = require('../middlewares/validation');
 
 // Catálogo general de cursos
 router.get('/temas', cursoController.getTemas);
@@ -28,7 +29,7 @@ router.get('/curso/:id/aula/:leccionId', isAuth, cursoController.getAulaVirtual)
 router.post('/curso/:id/leccion/:leccionId/completar', isAuth, cursoController.postCompletarLeccion);
 
 // Guardar avance del proyecto práctico del estudiante
-router.post('/curso/:id/proyecto/guardar', isAuth, cursoController.postGuardarProyecto);
+router.post('/curso/:id/proyecto/guardar', isAuth, validarProyecto, cursoController.postGuardarProyecto);
 
 // Compatibilidad con endpoint API previo
 router.post('/api/progreso/completar', isAuth, cursoController.postCompletarProgreso);

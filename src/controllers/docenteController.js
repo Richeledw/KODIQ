@@ -216,6 +216,11 @@ exports.eliminarCurso = async (req, res) => {
         await Course.findOneAndDelete({ id: cleanId });
         await Enrollment.deleteMany({ cursoId: cleanId });
         await StudentProject.deleteMany({ cursoId: cleanId });
+        // Limpiar el espejo legado para que no queden referencias al curso eliminado.
+        await User.updateMany(
+            { cursosInscritos: cleanId },
+            { $pull: { cursosInscritos: cleanId } }
+        );
 
         req.flash('success_msg', `Curso "${curso.titulo}" eliminado exitosamente.`);
         res.redirect('/docente/dashboard');
@@ -410,11 +415,20 @@ exports.eliminarRecurso = async (req, res) => {
         const { id, rId } = req.params;
         const curso = await Course.findOne({ id });
 
-        if (curso) {
-            curso.recursosGlobales = curso.recursosGlobales.filter(r => r._id.toString() !== rId);
-            await curso.save();
-            req.flash('success_msg', 'Recurso eliminado.');
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/docente/dashboard');
         }
+
+        const indice = (curso.recursosGlobales || []).findIndex((r) => String(r._id) === String(rId));
+        if (indice === -1) {
+            req.flash('error_msg', 'El recurso no existe o ya fue eliminado.');
+            return res.redirect(`/docente/cursos/${id}/contenido`);
+        }
+
+        curso.recursosGlobales.splice(indice, 1);
+        await curso.save();
+        req.flash('success_msg', 'Recurso eliminado.');
 
         res.redirect(`/docente/cursos/${id}/contenido`);
     } catch (err) {

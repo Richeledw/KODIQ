@@ -13,6 +13,19 @@ const progressService = require('../services/progressService');
 const crypto = require('crypto');
 
 /**
+ * @helper puedeVerCursoNoPublicado
+ * @description Un curso despublicado solo es visible para un admin o para su autor.
+ * @param {Object} curso Documento de curso.
+ * @param {Object} user Usuario autenticado (puede ser undefined).
+ * @returns {boolean}
+ */
+function puedeVerCursoNoPublicado(curso, user) {
+    if (!user) return false;
+    if (user.rol === 'admin') return true;
+    return Boolean(curso.autor && String(curso.autor) === String(user._id));
+}
+
+/**
  * @route GET /temas
  * @description Renderiza el catálogo completo de cursos activos en la plataforma.
  */
@@ -71,9 +84,18 @@ exports.getCurso = async (req, res) => {
             });
         }
 
-        // Cursos relacionados de la misma categoría
+        // Un curso despublicado no debe ser accesible desde el catálogo público.
+        if (curso.publicado === false && !puedeVerCursoNoPublicado(curso, req.user)) {
+            return res.status(404).render('error', {
+                mensaje: 'Curso no disponible',
+                descripcion: 'El curso que buscas no está publicado en este momento.'
+            });
+        }
+
+        // Cursos relacionados de la misma categoría (solo publicados)
         const cursosRelacionados = await Course.find({
             categoria: curso.categoria,
+            publicado: true,
             id: { $ne: id }
         }).limit(3);
 
@@ -122,6 +144,12 @@ exports.postInscribir = async (req, res) => {
         const curso = await Course.findOne({ id });
         if (!curso) {
             req.flash('error_msg', 'El curso seleccionado no existe.');
+            return res.redirect('/temas');
+        }
+
+        // No se permite una inscripción nueva a un curso despublicado.
+        if (curso.publicado === false && !puedeVerCursoNoPublicado(curso, req.user)) {
+            req.flash('error_msg', 'Este curso no está disponible para inscripción en este momento.');
             return res.redirect('/temas');
         }
 

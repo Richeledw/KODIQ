@@ -296,6 +296,15 @@
                                 <label class="form-label fw-semibold text-dark">Consigna del Proyecto</label>
                                 <input type="text" name="proyectoDescripcion" id="edit-proyectoDescripcion" class="form-control">
                             </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="publicado" id="edit-publicado">
+                                    <label class="form-check-label fw-semibold text-dark" for="edit-publicado">
+                                        Curso publicado (visible en el catálogo)
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-top">
@@ -355,6 +364,7 @@
             document.getElementById('edit-descripcionLarga').value = btn.dataset.descripcionLarga;
             document.getElementById('edit-proyectoTitulo').value = btn.dataset.proyectoTitulo;
             document.getElementById('edit-proyectoDescripcion').value = btn.dataset.proyectoDesc;
+            document.getElementById('edit-publicado').checked = btn.dataset.publicado === 'true';
             document.getElementById('formEditarCurso').action = `/admin/cursos/${btn.dataset.id}/editar`;
         });
 

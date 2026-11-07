@@ -18,7 +18,8 @@ const {
     validarRegistro,
     validarLogin,
     validarOlvidePassword,
-    validarResetPassword
+    validarResetPassword,
+    validarTokenReset
 } = require('../middlewares/validation');
 
 // Ruta para mostrar el formulario de registro (redirige si ya está autenticado)
@@ -55,7 +56,7 @@ router.get('/api/auth/session', (req, res) => {
 // Rutas de Recuperación de Contraseña
 router.get('/olvide-password', redirectIfAuth, authController.getOlvidePassword);
 router.post('/olvide-password', forgotPasswordLimiter, validarOlvidePassword, authController.postOlvidePassword);
-router.get('/reset-password/:token', redirectIfAuth, authController.getResetPassword);
-router.post('/reset-password/:token', resetPasswordLimiter, validarResetPassword, authController.postResetPassword);
+router.get('/reset-password/:token', redirectIfAuth, validarTokenReset, authController.getResetPassword);
+router.post('/reset-password/:token', resetPasswordLimiter, validarTokenReset, validarResetPassword, authController.postResetPassword);
 
 module.exports = router;

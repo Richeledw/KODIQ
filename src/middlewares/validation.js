@@ -94,6 +94,16 @@ const validarResetPassword = validar([
         .withMessage('Las contraseñas no coinciden.')
 ], (req) => `/reset-password/${req.params.token}`);
 
+// El token se genera con 24 bytes aleatorios en hexadecimal (48 caracteres).
+// Rechazarlo antes de consultar evita expresiones raras y consultas innecesarias.
+const validarTokenReset = validar([
+    param('token')
+        .customSanitizer(aTexto)
+        .isLength({ min: 48, max: 48 })
+        .matches(/^[a-f0-9]+$/i)
+        .withMessage('El enlace de recuperación no es válido.')
+], '/olvide-password');
+
 // ── Perfil ─────────────────────────────────────────────────────────────────
 const validarPerfil = validar([
     textoObligatorio('nombre', 'El nombre', 2, 80),
@@ -187,6 +197,32 @@ const validarRetroalimentacion = validar([
         .isIn(['En Progreso', 'En Revisión', 'Completado']).withMessage('El estado del proyecto no es válido.')
 ], (req) => req.originalUrl.includes('/admin/') ? '/admin/proyectos' : '/docente/proyectos');
 
+// Proyecto práctico guardado por el estudiante. Los enlaces solo admiten
+// http(s) para no permitir esquemas peligrosos como javascript: o data:.
+const urlProyecto = (campo, etiqueta) =>
+    body(campo)
+        .optional({ values: 'falsy' })
+        .customSanitizer(aTexto)
+        .trim()
+        .isLength({ max: 500 })
+        .withMessage(`${etiqueta} no puede superar 500 caracteres.`)
+        .custom((valor) => /^https?:\/\//i.test(valor))
+        .withMessage(`${etiqueta} debe empezar por http:// o https://.`);
+
+const validarProyecto = validar([
+    textoOpcional('titulo', 'El título del proyecto', 150),
+    textoOpcional('descripcion', 'La descripción del proyecto', 5000),
+    textoOpcional('notasAvance', 'Las notas de avance', 10000),
+    urlProyecto('repositorioUrl', 'La URL del repositorio'),
+    urlProyecto('despliegueUrl', 'La URL del despliegue'),
+    urlProyecto('videoDemoUrl', 'La URL del video de demostración'),
+    body('estado')
+        .optional({ values: 'falsy' })
+        .customSanitizer(aTexto)
+        .isIn(['En Progreso', 'En Revisión'])
+        .withMessage('El estado del proyecto no es válido.')
+], (req) => `/curso/${req.params.id}/aula`);
+
 const validarRol = validar([
     body('rol').isIn(['estudiante', 'docente', 'admin']).withMessage('Rol especificado no válido.')
 ], '/admin/usuarios');
@@ -206,6 +242,7 @@ module.exports = {
     validarLogin,
     validarOlvidePassword,
     validarResetPassword,
+    validarTokenReset,
     validarPerfil,
     validarCambioPassword,
     validarContacto,
@@ -214,6 +251,7 @@ module.exports = {
     validarLeccion,
     validarRecurso,
     validarRetroalimentacion,
+    validarProyecto,
     validarRol,
     validarUsuarioId,
     validarProyectoId

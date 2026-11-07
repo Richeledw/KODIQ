@@ -295,12 +295,10 @@ exports.eliminarUsuario = async (req, res) => {
 exports.getCursos = async (req, res) => {
     try {
         const cursos = await Course.find().sort({ creadoEn: -1 });
-        const docentes = await User.find({ rol: { $in: ['docente', 'admin'] } }).select('nombre email');
 
         res.render('admin/cursos', {
             titlePage: 'Gestión Global de Cursos',
-            cursos,
-            docentes
+            cursos
         });
     } catch (err) {
         console.error('Error al cargar cursos en admin:', err);
@@ -379,7 +377,7 @@ exports.editarCurso = async (req, res) => {
         const { id } = req.params;
         const { titulo, descripcion, descripcionLarga, categoria, nivel, duracion, icono, color, publicado, proyectoTitulo, proyectoDescripcion } = req.body;
 
-        await Course.findOneAndUpdate(
+        const cursoActualizado = await Course.findOneAndUpdate(
             { id },
             {
                 titulo: titulo.trim(),
@@ -393,8 +391,14 @@ exports.editarCurso = async (req, res) => {
                 publicado: publicado === 'on' || publicado === true || publicado === 'true',
                 'proyectoConsigna.titulo': proyectoTitulo || 'Proyecto Final Práctico',
                 'proyectoConsigna.descripcion': proyectoDescripcion || ''
-            }
+            },
+            { new: true }
         );
+
+        if (!cursoActualizado) {
+            req.flash('error_msg', 'El curso no existe o ya fue eliminado.');
+            return res.redirect('/admin/cursos');
+        }
 
         req.flash('success_msg', 'Curso actualizado exitosamente.');
         res.redirect('/admin/cursos');
@@ -428,6 +432,11 @@ exports.eliminarCurso = async (req, res) => {
         const cursoSlug = cursoEliminado.id || cleanId;
         await Enrollment.deleteMany({ cursoId: cursoSlug });
         await StudentProject.deleteMany({ cursoId: cursoSlug });
+        // Limpiar el espejo legado para que no queden referencias al curso eliminado.
+        await User.updateMany(
+            { cursosInscritos: cursoSlug },
+            { $pull: { cursosInscritos: cursoSlug } }
+        );
 
         req.flash('success_msg', `Curso "${cursoEliminado.titulo}" eliminado exitosamente de la plataforma.`);
         res.redirect('/admin/cursos');
@@ -626,11 +635,20 @@ exports.eliminarRecurso = async (req, res) => {
         const { id, rId } = req.params;
         const curso = await Course.findOne({ id });
 
-        if (curso) {
-            curso.recursosGlobales = curso.recursosGlobales.filter(r => r._id.toString() !== rId);
-            await curso.save();
-            req.flash('success_msg', 'Recurso eliminado.');
+        if (!curso) {
+            req.flash('error_msg', 'Curso no encontrado.');
+            return res.redirect('/admin/cursos');
         }
+
+        const indice = (curso.recursosGlobales || []).findIndex((r) => String(r._id) === String(rId));
+        if (indice === -1) {
+            req.flash('error_msg', 'El recurso no existe o ya fue eliminado.');
+            return res.redirect(`/admin/cursos/${id}/contenido`);
+        }
+
+        curso.recursosGlobales.splice(indice, 1);
+        await curso.save();
+        req.flash('success_msg', 'Recurso eliminado.');
 
         res.redirect(`/admin/cursos/${id}/contenido`);
     } catch (err) {

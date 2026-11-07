@@ -23,9 +23,11 @@ const EnrollmentSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    leccionesCompletadas: [{
-        type: String
-    }],
+    leccionesCompletadas: [
+        {
+            type: String
+        }
+    ],
     progreso: {
         type: Number,
         default: 0

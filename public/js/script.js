@@ -4,21 +4,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
-    
+
     if (menuToggle && navMenu) {
         // Toggle del menú al hacer clic en el botón hamburguesa
         menuToggle.addEventListener('click', () => {
             navMenu.classList.toggle('hidden');
         });
-        
+
         // Cerrar el menú cuando se hace clic en un enlace
         const navLinks = navMenu.querySelectorAll('a');
-        navLinks.forEach(link => {
+        navLinks.forEach((link) => {
             link.addEventListener('click', () => {
                 navMenu.classList.add('hidden');
             });
         });
-        
+
         // Cerrar el menú al hacer clic fuera de él
         document.addEventListener('click', (event) => {
             if (!menuToggle.contains(event.target) && !navMenu.contains(event.target)) {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const courses = topicsGrid.querySelectorAll('.topic-card');
             let visibleCount = 0;
 
-            courses.forEach(course => {
+            courses.forEach((course) => {
                 const title = course.querySelector('h3').textContent.toLowerCase();
                 const description = course.querySelector('p').textContent.toLowerCase();
                 const courseCategory = course.getAttribute('data-category');
@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Wait for the DOM to be fully loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
-
     // Get references to the necessary DOM elements
     const topicsGrid = document.getElementById('topics-grid');
     const topicContentArea = document.getElementById('topic-content-area');
@@ -133,8 +132,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentTemplates = document.getElementById('content-templates');
 
     // Check if all essential elements were found (only relevant for temas.html)
-    if (topicsGrid && topicContentArea && topicTitle && topicDetails && backButton && welcomeSection && topicsSection && contentTemplates) {
-
+    if (
+        topicsGrid &&
+        topicContentArea &&
+        topicTitle &&
+        topicDetails &&
+        backButton &&
+        welcomeSection &&
+        topicsSection &&
+        contentTemplates
+    ) {
         // Event listener for clicks within the topics grid
         topicsGrid.addEventListener('click', (event) => {
             // Find the closest ancestor element that is a topic card
@@ -144,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const topicId = card.getAttribute('data-topic');
                 const cardTitle = card.querySelector('h3').textContent;
                 const contentTemplate = document.getElementById(`${topicId}-content`);
-                
+
                 if (contentTemplate) {
                     // Update content area
                     topicTitle.textContent = cardTitle;
@@ -158,13 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Scroll to the content area
                     topicContentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
                 } else {
                     // Handle cases where content for a topic is not found
                     console.warn(`Contenido no encontrado para el tema: ${topicId}`);
                     // Optionally display a message to the user
                     topicTitle.textContent = cardTitle;
-                    topicDetails.innerHTML = '<p class="text-red-500">El contenido para este tema aún no está disponible.</p>';
+                    topicDetails.innerHTML =
+                        '<p class="text-red-500">El contenido para este tema aún no está disponible.</p>';
                     welcomeSection.style.display = 'none';
                     topicsSection.style.display = 'none';
                     topicContentArea.style.display = 'block';
@@ -187,19 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 topicsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
-    } 
+    }
 
     // ----------------------------------------------------------------------
     // NUEVA LÓGICA AÑADIDA PARA registro.html (VALIDACIÓN DE FORMULARIO)
     // ----------------------------------------------------------------------
-    
+
     // Asignar el listener de envío al botón si estamos en registro.html
     const authButton = document.getElementById('auth-submit-button');
     if (authButton) {
         authButton.addEventListener('click', handleAuthSubmit);
     }
 }); // End of DOMContentLoaded listener
-
 
 /**
  * Muestra un mensaje de alerta (error o éxito) en el formulario de registro.
@@ -210,18 +216,18 @@ document.addEventListener('DOMContentLoaded', () => {
 function showAlert(message, type = 'error') {
     const alertMessage = document.getElementById('alert-message');
     const alertText = document.getElementById('alert-text');
-    
+
     // Verificar que los elementos existen antes de manipularlos (solo si estamos en registro.html)
     if (!alertMessage || !alertText) {
         // En este punto, solo queremos evitar errores si la página no es registro.html
         return;
     }
-    
+
     // Limpiar clases anteriores y dejar las clases base de transición
     alertMessage.className = 'mb-4 p-3 rounded-md transition duration-300';
-    
+
     let classes = '';
-    
+
     if (type === 'error') {
         // Estilos de alerta de error (rojo con Tailwind)
         classes = 'bg-red-100 border border-red-400 text-red-700';
@@ -229,7 +235,7 @@ function showAlert(message, type = 'error') {
         // Estilos de alerta de éxito (verde con Tailwind)
         classes = 'bg-green-100 border border-green-400 text-green-700';
     }
-    
+
     // Aplicar clases de estilo y mostrar el mensaje
     alertMessage.classList.add(...classes.split(' '));
     alertText.textContent = message;
@@ -237,22 +243,22 @@ function showAlert(message, type = 'error') {
 }
 
 /**
- * Maneja el envío del formulario de autenticación (registro/login), 
+ * Maneja el envío del formulario de autenticación (registro/login),
  * realiza validaciones y muestra alertas.
  */
 function handleAuthSubmit() {
     // 1. Obtener valores
     const emailInput = document.getElementById('email-register');
     const passwordInput = document.getElementById('password-register');
-    
+
     // Si los inputs no existen, salimos (no estamos en registro.html)
     if (!emailInput || !passwordInput) {
-        return; 
+        return;
     }
-    
+
     const email = emailInput.value.trim();
     const password = passwordInput.value;
-    
+
     // Ocultar mensaje anterior antes de la nueva validación
     const alertMessage = document.getElementById('alert-message');
     if (alertMessage) {
@@ -260,7 +266,7 @@ function handleAuthSubmit() {
     }
 
     // 2. Simulación de Validación Front-end
-    
+
     // Validar formato de correo básico
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
@@ -277,16 +283,16 @@ function handleAuthSubmit() {
     }
 
     // 3. Simulación de Autenticación (simulación de Back-end)
-    
+
     // Caso de error simulado: Credenciales no válidas
     if (email.toLowerCase() === 'error@test.com') {
         showAlert('Error de credenciales. El correo o la contraseña son incorrectos.', 'error');
         return;
     }
-    
+
     // Caso de éxito simulado
     showAlert('¡Acceso Exitoso! Bienvenido a la plataforma.', 'success');
-    
+
     // En una app real: Redirección
-    // window.location.href = 'index.html'; 
+    // window.location.href = 'index.html';
 }

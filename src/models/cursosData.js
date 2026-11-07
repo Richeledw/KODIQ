@@ -5,7 +5,7 @@
  */
 
 const cursos = {
-    'html': {
+    html: {
         id: 'html',
         titulo: 'HTML Básico',
         descripcion: 'Aprende los fundamentos de HTML y estructura web desde cero.',
@@ -18,7 +18,7 @@ const cursos = {
         lecciones: 24,
         color: 'danger'
     },
-    'css': {
+    css: {
         id: 'css',
         titulo: 'CSS Esencial',
         descripcion: 'Domina el diseño y estilos web con CSS.',
@@ -31,7 +31,7 @@ const cursos = {
         lecciones: 28,
         color: 'info'
     },
-    'javascript': {
+    javascript: {
         id: 'javascript',
         titulo: 'JavaScript Introducción',
         descripcion: 'Introducción a la programación con JavaScript.',
@@ -44,7 +44,7 @@ const cursos = {
         lecciones: 32,
         color: 'warning'
     },
-    'python': {
+    python: {
         id: 'python',
         titulo: 'Python Fundamental',
         descripcion: 'Aprende Python desde cero.',
@@ -57,7 +57,7 @@ const cursos = {
         lecciones: 36,
         color: 'primary'
     },
-    'sql': {
+    sql: {
         id: 'sql',
         titulo: 'SQL Databases',
         descripcion: 'Domina las bases de datos SQL.',
@@ -70,7 +70,7 @@ const cursos = {
         lecciones: 30,
         color: 'danger'
     },
-    'typescript': {
+    typescript: {
         id: 'typescript',
         titulo: 'TypeScript Mastery',
         descripcion: 'Tipado estricto y patrones avanzados.',

@@ -22,12 +22,15 @@ function crearLimitador({ windowMs, limit, message, redirectTo }) {
         limit,
         standardHeaders: 'draft-8',
         legacyHeaders: false,
+        validate: { xForwardedForHeader: false, default: false },
+        keyGenerator: (req) =>
+            req.ip || req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || '127.0.0.1',
         // Evita que un formulario quede bloqueado sin explicación: flash + 429.
         handler: (req, res) => {
             if (req.flash) {
                 req.flash('error_msg', message);
             }
-            return res.status(429).redirect(redirectTo);
+            return res.redirect(429, redirectTo);
         }
     });
 }

@@ -5,6 +5,7 @@
 
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const os = require('os');
 
 // Verifica si la variable de entorno MONGO_URI está definida.
 // Si no lo está, carga el archivo de configuración .env para poder leerla.
@@ -21,8 +22,10 @@ if (!process.env.MONGO_URI) {
 const connectDB = async () => {
     try {
         // Conexión a la base de datos usando la URI almacenada en las variables de entorno
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        
+        const conn = await mongoose.connect(process.env.MONGO_URI, {
+            runtimeAdapters: { os }
+        });
+
         // Mensaje de confirmación con el host al que se conectó
         console.log(`MongoDB Conectado: ${conn.connection.host}`);
 

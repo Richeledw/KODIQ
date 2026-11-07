@@ -23,44 +23,50 @@ const HASH_FALSO = bcrypt.hashSync('eduplat-timing-equalizer', 10);
  */
 module.exports = function (passport) {
     // Definimos la estrategia local usando el campo 'email' como nombre de usuario principal
-    passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
-        try {
-            // Normalizamos la entrada: nunca debe llegar un objeto desde el body.
-            const emailNormalizado = String(email || '').trim().toLowerCase();
-            const passwordSegura = String(password || '');
+    passport.use(
+        new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
+            try {
+                // Normalizamos la entrada: nunca debe llegar un objeto desde el body.
+                const emailNormalizado = String(email || '')
+                    .trim()
+                    .toLowerCase();
+                const passwordSegura = String(password || '');
 
-            // Buscamos el usuario por email. La collation permite encontrar cuentas
-            // antiguas guardadas con mayúsculas sin necesidad de migrarlas.
-            const user = await User.findOne({ email: emailNormalizado })
-                .collation({ locale: 'en', strength: 2 })
-                .select('+password');
+                // Buscamos el usuario por email. La collation permite encontrar cuentas
+                // antiguas guardadas con mayúsculas sin necesidad de migrarlas.
+                const user = await User.findOne({ email: emailNormalizado })
+                    .collation({ locale: 'en', strength: 2 })
+                    .select('+password');
 
-            // Si no se encuentra el usuario, comparamos contra un hash falso y
-            // devolvemos el mismo mensaje genérico que una contraseña incorrecta.
-            if (!user) {
-                await bcrypt.compare(passwordSegura, HASH_FALSO);
-                return done(null, false, { message: 'Credenciales incorrectas' });
+                // Si no se encuentra el usuario, comparamos contra un hash falso y
+                // devolvemos el mismo mensaje genérico que una contraseña incorrecta.
+                if (!user) {
+                    await bcrypt.compare(passwordSegura, HASH_FALSO);
+                    return done(null, false, { message: 'Credenciales incorrectas' });
+                }
+
+                // Verificamos si la contraseña coincide llamando al método del modelo de usuario
+                const isMatch = await user.matchPassword(passwordSegura);
+
+                if (!isMatch) {
+                    return done(null, false, { message: 'Credenciales incorrectas' });
+                }
+
+                // Verificamos si la cuenta está activa
+                if (user.activo === false) {
+                    return done(null, false, {
+                        message: 'Tu cuenta ha sido desactivada. Comunícate con el administrador.'
+                    });
+                }
+
+                // Autenticación exitosa, retornamos el objeto del usuario
+                return done(null, user);
+            } catch (err) {
+                console.error('Error en la estrategia de Passport:', err);
+                return done(err);
             }
-
-            // Verificamos si la contraseña coincide llamando al método del modelo de usuario
-            const isMatch = await user.matchPassword(passwordSegura);
-
-            if (!isMatch) {
-                return done(null, false, { message: 'Credenciales incorrectas' });
-            }
-
-            // Verificamos si la cuenta está activa
-            if (user.activo === false) {
-                return done(null, false, { message: 'Tu cuenta ha sido desactivada. Comunícate con el administrador.' });
-            }
-
-            // Autenticación exitosa, retornamos el objeto del usuario
-            return done(null, user);
-        } catch (err) {
-            console.error('Error en la estrategia de Passport:', err);
-            return done(err);
-        }
-    }));
+        })
+    );
 
     /**
      * @description Serializar el usuario para guardar su identificador (ID) dentro de la sesión.

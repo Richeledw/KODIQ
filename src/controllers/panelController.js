@@ -30,12 +30,12 @@ exports.getPanel = async (req, res) => {
 
         // Mapear cursos en un diccionario rápido por ID
         const cursosDict = {};
-        allDbCourses.forEach(c => {
+        allDbCourses.forEach((c) => {
             cursosDict[c.id] = c;
         });
 
         // Combinar con estáticos si alguno no está en BD
-        Object.keys(staticCursos).forEach(id => {
+        Object.keys(staticCursos).forEach((id) => {
             if (!cursosDict[id]) {
                 cursosDict[id] = { id, ...staticCursos[id], modulos: [] };
             }
@@ -43,14 +43,13 @@ exports.getPanel = async (req, res) => {
 
         // Migración perezosa: si el estudiante solo tiene el registro legado
         // en User.cursosInscritos, se crea su Enrollment al abrir el panel.
-        for (const ci of (user.cursosInscritos || [])) {
+        for (const ci of user.cursosInscritos || []) {
             const curso = cursosDict[ci.cursoId] || { id: ci.cursoId, modulos: [] };
             await progressService.obtenerInscripcion(user._id, curso);
         }
 
         // Enrollment es la fuente de verdad del progreso.
-        const inscripciones = await Enrollment.find({ estudiante: user._id })
-            .sort({ fechaInscripcion: -1 });
+        const inscripciones = await Enrollment.find({ estudiante: user._id }).sort({ fechaInscripcion: -1 });
 
         const cursosInscritos = inscripciones.map((ins) => {
             const infoCurso = cursosDict[ins.cursoId] || {
@@ -63,13 +62,11 @@ exports.getPanel = async (req, res) => {
             };
 
             const lecciones = progressService.obtenerLecciones(infoCurso);
-            const completadas = progressService.normalizarCompletadas(
-                infoCurso,
-                ins.leccionesCompletadas
-            );
-            const progreso = lecciones.length > 0
-                ? progressService.calcularProgreso(lecciones.length, completadas.length)
-                : Math.min(100, Math.max(0, Number(ins.progreso) || 0));
+            const completadas = progressService.normalizarCompletadas(infoCurso, ins.leccionesCompletadas);
+            const progreso =
+                lecciones.length > 0
+                    ? progressService.calcularProgreso(lecciones.length, completadas.length)
+                    : Math.min(100, Math.max(0, Number(ins.progreso) || 0));
 
             return {
                 ...(typeof infoCurso.toObject === 'function' ? infoCurso.toObject() : infoCurso),
@@ -83,12 +80,16 @@ exports.getPanel = async (req, res) => {
         const misProyectos = await StudentProject.find({ estudiante: user._id }).sort({ actualizadoEn: -1 });
 
         // Progreso promedio y métricas reales
-        const progresoPromedio = cursosInscritos.length > 0
-            ? Math.round(cursosInscritos.reduce((acc, c) => acc + (c.progreso || 0), 0) / cursosInscritos.length)
-            : 0;
+        const progresoPromedio =
+            cursosInscritos.length > 0
+                ? Math.round(cursosInscritos.reduce((acc, c) => acc + (c.progreso || 0), 0) / cursosInscritos.length)
+                : 0;
 
-        const proyectosCompletados = misProyectos.filter(p => p.estado === 'Completado').length;
-        const leccionesTotalesCompletadas = cursosInscritos.reduce((acc, c) => acc + (c.leccionesCompletadasCount || 0), 0);
+        const proyectosCompletados = misProyectos.filter((p) => p.estado === 'Completado').length;
+        const leccionesTotalesCompletadas = cursosInscritos.reduce(
+            (acc, c) => acc + (c.leccionesCompletadasCount || 0),
+            0
+        );
 
         res.render('panel', {
             titlePage: 'Mi Panel de Aprendizaje',
@@ -100,7 +101,6 @@ exports.getPanel = async (req, res) => {
             proyectosCompletados,
             leccionesTotalesCompletadas
         });
-
     } catch (err) {
         console.error('Error al cargar panel de estudiante:', err);
         res.status(500).render('error', {
@@ -140,7 +140,9 @@ exports.postActualizarPerfil = async (req, res) => {
     try {
         // SEGURIDAD: normalizamos y forzamos string en todos los campos editables.
         const nombre = String(req.body.nombre || '').trim();
-        const email = String(req.body.email || '').trim().toLowerCase();
+        const email = String(req.body.email || '')
+            .trim()
+            .toLowerCase();
         const telefono = String(req.body.telefono || '').trim();
         const ciudad = String(req.body.ciudad || '').trim();
         const bio = String(req.body.bio || '').trim();
@@ -157,8 +159,10 @@ exports.postActualizarPerfil = async (req, res) => {
         }
 
         if (email && email !== user.email) {
-            const emailExiste = await User.findOne({ email, _id: { $ne: user._id } })
-                .collation({ locale: 'en', strength: 2 });
+            const emailExiste = await User.findOne({ email, _id: { $ne: user._id } }).collation({
+                locale: 'en',
+                strength: 2
+            });
             if (emailExiste) {
                 req.flash('error_msg', 'Ese correo electrónico ya está registrado por otra cuenta.');
                 return res.redirect('/configuracion');
@@ -271,7 +275,7 @@ exports.postEliminarCuenta = async (req, res) => {
         await User.findByIdAndDelete(userId);
 
         if (typeof req.logout === 'function') {
-            req.logout(function (err) {
+            req.logout(function (_err) {
                 if (req.session) {
                     req.session.destroy(() => {
                         res.redirect('/?cuentaEliminada=true');
@@ -317,7 +321,11 @@ exports.postActualizarAvatar = async (req, res) => {
         if (user.avatar && user.avatar.startsWith('/uploads/avatars/')) {
             const oldPath = path.join(__dirname, '../../public', user.avatar);
             if (fs.existsSync(oldPath)) {
-                try { fs.unlinkSync(oldPath); } catch (e) { console.error('Error al borrar avatar viejo:', e); }
+                try {
+                    fs.unlinkSync(oldPath);
+                } catch (e) {
+                    console.error('Error al borrar avatar viejo:', e);
+                }
             }
         }
 
@@ -330,7 +338,6 @@ exports.postActualizarAvatar = async (req, res) => {
 
         req.flash('success_msg', 'Foto de perfil actualizada exitosamente.');
         res.redirect('/configuracion');
-
     } catch (err) {
         console.error('Error al actualizar avatar:', err);
         req.flash('error_msg', 'Error al procesar la subida del avatar.');

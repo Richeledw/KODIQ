@@ -33,15 +33,12 @@ exports.getAulaVirtual = async (req, res) => {
         }
 
         const todasLasLecciones = progressService.obtenerLecciones(curso);
-        const leccionesCompletadas = progressService.normalizarCompletadas(
-            curso,
-            inscripcion.leccionesCompletadas
-        );
+        const leccionesCompletadas = progressService.normalizarCompletadas(curso, inscripcion.leccionesCompletadas);
 
         let leccionActiva = null;
         if (leccionId) {
-            leccionActiva = todasLasLecciones.find((l) =>
-                String(l.id) === String(leccionId) || String(l._id) === String(leccionId)
+            leccionActiva = todasLasLecciones.find(
+                (l) => String(l.id) === String(leccionId) || String(l._id) === String(leccionId)
             );
         }
         if (!leccionActiva && todasLasLecciones.length > 0) {
@@ -122,8 +119,8 @@ exports.postCompletarLeccion = async (req, res) => {
             return res.redirect(`/curso/${id}`);
         }
 
-        const leccion = lecciones.find((l) =>
-            String(l.id) === String(leccionId) || String(l._id) === String(leccionId)
+        const leccion = lecciones.find(
+            (l) => String(l.id) === String(leccionId) || String(l._id) === String(leccionId)
         );
         if (!leccion) {
             if (esperaJson) return res.status(404).json({ success: false, msg: 'Lección no encontrada' });
@@ -141,9 +138,7 @@ exports.postCompletarLeccion = async (req, res) => {
 
         const completadas = progressService.normalizarCompletadas(curso, inscripcion.leccionesCompletadas);
         const yaCompletada = completadas.includes(clave);
-        const nuevas = yaCompletada
-            ? completadas.filter((c) => c !== clave)
-            : [...completadas, clave];
+        const nuevas = yaCompletada ? completadas.filter((c) => c !== clave) : [...completadas, clave];
 
         const resultado = await progressService.guardarProgreso(req.user.id, curso, nuevas);
 
@@ -195,7 +190,7 @@ exports.postGuardarProyecto = async (req, res) => {
 
         const proyectoExistente = await StudentProject.findOne({ estudiante: user._id, cursoId: id });
 
-        let estadoPermitido = (estado === 'En Revisión') ? 'En Revisión' : 'En Progreso';
+        let estadoPermitido = estado === 'En Revisión' ? 'En Revisión' : 'En Progreso';
         if (proyectoExistente && proyectoExistente.estado === 'Completado') {
             estadoPermitido = 'Completado';
         }
@@ -262,10 +257,7 @@ exports.getCertificado = async (req, res) => {
             return res.redirect(`/curso/${id}`);
         }
 
-        const leccionesAl100 = progressService.estaCompleto(
-            curso,
-            inscripcion.leccionesCompletadas
-        );
+        const leccionesAl100 = progressService.estaCompleto(curso, inscripcion.leccionesCompletadas);
 
         const proyecto = await StudentProject.findOne({
             estudiante: user._id,
@@ -274,11 +266,15 @@ exports.getCertificado = async (req, res) => {
         });
 
         if (!leccionesAl100 || !proyecto) {
-            req.flash('error_msg', 'Para obtener tu certificación oficial debes completar el 100% de las lecciones del curso y tener tu proyecto práctico aprobado por el docente.');
+            req.flash(
+                'error_msg',
+                'Para obtener tu certificación oficial debes completar el 100% de las lecciones del curso y tener tu proyecto práctico aprobado por el docente.'
+            );
             return res.redirect(`/curso/${id}/aula`);
         }
 
-        const hashCertificado = crypto.createHash('sha256')
+        const hashCertificado = crypto
+            .createHash('sha256')
             .update(`${user._id}-${id}-eduplat-verified-cert`)
             .digest('hex')
             .substring(0, 12)
@@ -346,7 +342,8 @@ exports.postEvaluarQuiz = async (req, res) => {
                         'Sanitizar entradas, validar esquemas y escapar salidas en plantillas'
                     ],
                     respuestaCorrecta: 2,
-                    explicacion: 'La defensa en profundidad exige validación estricta y sanitización de entrada y salida.'
+                    explicacion:
+                        'La defensa en profundidad exige validación estricta y sanitización de entrada y salida.'
                 }
             ];
         }

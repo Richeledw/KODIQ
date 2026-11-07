@@ -32,8 +32,7 @@ const limitarProgreso = (valor) => Math.min(100, Math.max(0, Number(valor) || 0)
         const cursos = await Course.find().lean();
         const cursosPorId = new Map(cursos.map((curso) => [curso.id, curso]));
 
-        const usuarios = await User.find({ 'cursosInscritos.0': { $exists: true } })
-            .select('cursosInscritos');
+        const usuarios = await User.find({ 'cursosInscritos.0': { $exists: true } }).select('cursosInscritos');
 
         const resumen = {
             usuarios: usuarios.length,
@@ -45,18 +44,14 @@ const limitarProgreso = (valor) => Math.min(100, Math.max(0, Number(valor) || 0)
         };
 
         for (const usuario of usuarios) {
-            for (const legado of (usuario.cursosInscritos || [])) {
+            for (const legado of usuario.cursosInscritos || []) {
                 resumen.inscripcionesLegado += 1;
 
-                const curso = cursosPorId.get(legado.cursoId)
-                    || { id: legado.cursoId, modulos: [] };
+                const curso = cursosPorId.get(legado.cursoId) || { id: legado.cursoId, modulos: [] };
                 const total = progressService.obtenerLecciones(curso).length;
                 if (total === 0) resumen.cursosSinLecciones += 1;
 
-                const completadasLegado = progressService.normalizarCompletadas(
-                    curso,
-                    legado.leccionesCompletadas
-                );
+                const completadasLegado = progressService.normalizarCompletadas(curso, legado.leccionesCompletadas);
 
                 const existente = await Enrollment.findOne({
                     estudiante: usuario._id,
@@ -64,9 +59,10 @@ const limitarProgreso = (valor) => Math.min(100, Math.max(0, Number(valor) || 0)
                 });
 
                 if (!existente) {
-                    const progreso = total > 0
-                        ? progressService.calcularProgreso(total, completadasLegado.length)
-                        : limitarProgreso(legado.progreso);
+                    const progreso =
+                        total > 0
+                            ? progressService.calcularProgreso(total, completadasLegado.length)
+                            : limitarProgreso(legado.progreso);
 
                     if (APLICAR) {
                         await Enrollment.create({
@@ -84,16 +80,18 @@ const limitarProgreso = (valor) => Math.min(100, Math.max(0, Number(valor) || 0)
                 }
 
                 // Si ya existe, unimos ambos conjuntos para no perder avance.
-                const completadas = progressService.normalizarCompletadas(
-                    curso,
-                    [...(existente.leccionesCompletadas || []), ...completadasLegado]
-                );
-                const progreso = total > 0
-                    ? progressService.calcularProgreso(total, completadas.length)
-                    : limitarProgreso(existente.progreso);
+                const completadas = progressService.normalizarCompletadas(curso, [
+                    ...(existente.leccionesCompletadas || []),
+                    ...completadasLegado
+                ]);
+                const progreso =
+                    total > 0
+                        ? progressService.calcularProgreso(total, completadas.length)
+                        : limitarProgreso(existente.progreso);
 
-                const cambia = completadas.length !== (existente.leccionesCompletadas || []).length
-                    || progreso !== existente.progreso;
+                const cambia =
+                    completadas.length !== (existente.leccionesCompletadas || []).length ||
+                    progreso !== existente.progreso;
 
                 if (cambia) {
                     if (APLICAR) {

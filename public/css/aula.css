@@ -3,7 +3,9 @@
  * @description Estilos desacoplados del Aula Virtual (Course Player).
  */
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body.aula-body {
     font-family: var(--font-body);
@@ -44,8 +46,8 @@ body.aula-body {
     height: 0;
     overflow: hidden;
     border-radius: 14px;
-    background: #09090B;
-    border: 1px solid #27272A;
+    background: #09090b;
+    border: 1px solid #27272a;
     box-shadow: var(--shadow-md);
 }
 
@@ -76,7 +78,7 @@ body.aula-body {
 
 /* ── Tabs Content ── */
 .aula-tabs .nav-link {
-    color: #71717A;
+    color: #71717a;
     font-weight: 600;
     font-size: 0.92rem;
     padding: 0.9rem 1.25rem;
@@ -107,20 +109,20 @@ body.aula-body {
 
 /* ── Code Box ── */
 .code-container {
-    background: #18181B;
+    background: #18181b;
     border-radius: 10px;
     overflow: hidden;
     margin: 1.25rem 0;
-    border: 1px solid #27272A;
+    border: 1px solid #27272a;
 }
 
 .code-header {
-    background: #09090B;
+    background: #09090b;
     padding: 0.6rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #A1A1AA;
+    color: #a1a1aa;
     font-size: 0.8rem;
     font-family: var(--font-mono);
 }
@@ -128,7 +130,7 @@ body.aula-body {
 .code-block {
     padding: 1.25rem;
     margin: 0;
-    color: #FAFAFA;
+    color: #fafafa;
     font-family: var(--font-mono);
     font-size: 0.88rem;
     line-height: 1.6;
@@ -138,24 +140,24 @@ body.aula-body {
 
 /* ── Terminal Interactivo Embebido ── */
 .terminal-window {
-    background: #09090B;
-    border: 1px solid #27272A;
+    background: #09090b;
+    border: 1px solid #27272a;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
     font-family: var(--font-mono);
-    color: #F4F4F5;
+    color: #f4f4f5;
 }
 
 .terminal-header {
-    background: #18181B;
+    background: #18181b;
     padding: 0.65rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #27272A;
+    border-bottom: 1px solid #27272a;
     font-size: 0.78rem;
-    color: #A1A1AA;
+    color: #a1a1aa;
 }
 
 .terminal-dots {
@@ -184,7 +186,7 @@ body.aula-body {
 }
 
 .terminal-prompt {
-    color: #10B981;
+    color: #10b981;
     font-weight: 600;
 }
 
@@ -198,12 +200,12 @@ body.aula-body {
 .terminal-input {
     background: transparent;
     border: none;
-    color: #FFFFFF;
+    color: #ffffff;
     font-family: var(--font-mono);
     font-size: 0.88rem;
     outline: none;
     flex: 1;
-    caret-color: #10B981;
+    caret-color: #10b981;
 }
 
 /* ── Sidebar Lecciones ── */
@@ -236,20 +238,20 @@ body.aula-body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border-bottom: 1px solid #F4F4F5;
+    border-bottom: 1px solid #f4f4f5;
     text-decoration: none;
-    color: #52525B;
+    color: #52525b;
     font-size: 0.88rem;
     transition: all 0.15s ease;
 }
 
 .lesson-item:hover {
-    background: #FAFAFB;
+    background: #fafafb;
     color: var(--brand-dark);
 }
 
 .lesson-item.active {
-    background: #F4F4F5;
+    background: #f4f4f5;
     color: var(--brand-dark);
     font-weight: 600;
     border-left: 3px solid var(--brand-dark);
@@ -267,12 +269,12 @@ body.aula-body {
 }
 
 .lesson-check.completed {
-    background: #18181B;
-    color: #FFFFFF;
-    border: 1px solid #27272A;
+    background: #18181b;
+    color: #ffffff;
+    border: 1px solid #27272a;
 }
 
 .lesson-check.pending {
-    border: 2px dashed #D4D4D8;
+    border: 2px dashed #d4d4d8;
     color: transparent;
 }

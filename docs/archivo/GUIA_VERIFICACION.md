@@ -18,73 +18,81 @@ npm run dev
 ## 🌐 Paso 2: Verificar Cada Página
 
 ### ✅ Página de Inicio (`/`)
+
 1. Abre: `http://localhost:3000/`
 2. Verifica:
-   - [ ] La página carga sin errores
-   - [ ] Se ve el hero con gradiente
-   - [ ] Six tarjetas de cursos destacados
-   - [ ] Footer tiene texto blanco sobre fondo oscuro
-   - [ ] Links en footer funcionan
+    - [ ] La página carga sin errores
+    - [ ] Se ve el hero con gradiente
+    - [ ] Six tarjetas de cursos destacados
+    - [ ] Footer tiene texto blanco sobre fondo oscuro
+    - [ ] Links en footer funcionan
 
 ### ✅ Catálogo de Cursos (`/temas`)
+
 1. Abre: `http://localhost:3000/temas`
 2. Verifica:
-   - [ ] Grid de 6 cursos se muestra
-   - [ ] **CRÍTICO:** Cada tarjeta muestra su logo SVG:
-     - HTML → logo HTML5 (rojo)
-     - CSS → logo CSS3 (azul)
-     - JavaScript → logo JS (amarillo)
-     - Python → logo Python
-     - SQL → logo MySQL
-     - TypeScript → logo TypeScript
-   - [ ] Footer visible y legible (blanco sobre oscuro)
-   - [ ] Botón "Ver Curso" en cada tarjeta funciona
+    - [ ] Grid de 6 cursos se muestra
+    - [ ] **CRÍTICO:** Cada tarjeta muestra su logo SVG:
+        - HTML → logo HTML5 (rojo)
+        - CSS → logo CSS3 (azul)
+        - JavaScript → logo JS (amarillo)
+        - Python → logo Python
+        - SQL → logo MySQL
+        - TypeScript → logo TypeScript
+    - [ ] Footer visible y legible (blanco sobre oscuro)
+    - [ ] Botón "Ver Curso" en cada tarjeta funciona
 
 ### ✅ Detalle de Curso (`/curso/html`)
+
 1. Abre: `http://localhost:3000/curso/html`
 2. Verifica:
-   - [ ] Se carga sin errores
-   - [ ] Se ve el logo del curso
-   - [ ] Información del curso visible
-   - [ ] En el footer: "Volver a Cursos" → `/temas` funciona
-   - [ ] Footer legible
+    - [ ] Se carga sin errores
+    - [ ] Se ve el logo del curso
+    - [ ] Información del curso visible
+    - [ ] En el footer: "Volver a Cursos" → `/temas` funciona
+    - [ ] Footer legible
 
 ### ✅ Registro (`/registro`)
+
 1. Abre: `http://localhost:3000/registro`
 2. Verifica:
-   - [ ] Formulario carga correctamente
-   - [ ] Footer legible y con estructura completa
-   - [ ] Botón "Registrarse" funciona
+    - [ ] Formulario carga correctamente
+    - [ ] Footer legible y con estructura completa
+    - [ ] Botón "Registrarse" funciona
 
 ### ✅ Contacto (`/contacto`)
+
 1. Abre: `http://localhost:3000/contacto`
 2. Verifica:
-   - [ ] Formulario carga correctamente
-   - [ ] Footer legible y con estructura completa
-   - [ ] Botón "Enviar" funciona
+    - [ ] Formulario carga correctamente
+    - [ ] Footer legible y con estructura completa
+    - [ ] Botón "Enviar" funciona
 
 ---
 
 ## 🔍 Paso 3: Verificar en Consola del Navegador (F12)
 
 ### Pestaña "Console"
+
 - [ ] NO hay errores rojos
 - [ ] NO hay advertencias de `404 Not Found`
 - [ ] NO hay referencias a `/static/img/`
 
 ### Pestaña "Network"
+
 1. Recarga la página: `Ctrl+F5`
 2. Busca archivos:
-   - [ ] `/styles.css` → Carga correctamente
-   - [ ] `/img/html5.svg` → Carga correctamente
-   - [ ] `/img/css3-alt.svg` → Carga correctamente
-   - [ ] Otros logos SVG → Cargan correctamente
+    - [ ] `/styles.css` → Carga correctamente
+    - [ ] `/img/html5.svg` → Carga correctamente
+    - [ ] `/img/css3-alt.svg` → Carga correctamente
+    - [ ] Otros logos SVG → Cargan correctamente
 
 ---
 
 ## 🗂️ Paso 4: Verificar Estructura de Carpetas
 
 ### Terminal:
+
 ```bash
 # Verificar que /views existe
 dir views
@@ -100,6 +108,7 @@ dir templates  # Debe fallar
 ```
 
 **Esperado:**
+
 ```
 ✅ views/ → Contiene: home.ejs, temas.ejs, curso.ejs, etc.
 ✅ static/ → Contiene: styles.css, script.js, img/
@@ -116,10 +125,10 @@ En cualquier página, desplázate al footer y verifica:
 - [ ] **Color de fondo:** Oscuro (gris oscuro/negro)
 - [ ] **Color del texto:** Blanco (claro, legible)
 - [ ] **Estructura:** 4 columnas
-  - Logo y descripción
-  - Enlaces rápidos
-  - Contacto
-  - Redes sociales
+    - Logo y descripción
+    - Enlaces rápidos
+    - Contacto
+    - Redes sociales
 - [ ] **Iconos de redes:** Se ven en blanco
 - [ ] **Línea divisora:** Es visible
 
@@ -148,10 +157,11 @@ En las plantillas EJS, verifica:
 
 ```html
 <!-- ✅ Debe ser /styles.css NO /static/styles.css -->
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css" />
 ```
 
 Lugares donde aparece:
+
 - [ ] `views/home.ejs`
 - [ ] `views/temas.ejs`
 - [ ] `views/curso.ejs`
@@ -162,22 +172,23 @@ Lugares donde aparece:
 
 ## ✨ Resumen de Verificación
 
-| Elemento | Verificar | Estado |
-|----------|-----------|--------|
-| Logos SVG en `/temas` | Visibles en cada tarjeta | ✅ |
-| Footer estilo | Blanco sobre oscuro | ✅ |
-| Rutas de CSS | `/styles.css` sin "static" | ✅ |
-| Rutas de imágenes | `/img/` sin "static" | ✅ |
-| Links de navegación | Funcionan hacia `/temas` | ✅ |
-| Consola del navegador | Sin errores 404 | ✅ |
-| Estructura de carpetas | `/views` existe, `/templates` NO | ✅ |
-| Responsive | En móvil se ve bien | ✅ |
+| Elemento               | Verificar                        | Estado |
+| ---------------------- | -------------------------------- | ------ |
+| Logos SVG en `/temas`  | Visibles en cada tarjeta         | ✅     |
+| Footer estilo          | Blanco sobre oscuro              | ✅     |
+| Rutas de CSS           | `/styles.css` sin "static"       | ✅     |
+| Rutas de imágenes      | `/img/` sin "static"             | ✅     |
+| Links de navegación    | Funcionan hacia `/temas`         | ✅     |
+| Consola del navegador  | Sin errores 404                  | ✅     |
+| Estructura de carpetas | `/views` existe, `/templates` NO | ✅     |
+| Responsive             | En móvil se ve bien              | ✅     |
 
 ---
 
 ## 🚨 Si Algo No Funciona
 
 ### Logos no se ven:
+
 ```bash
 # 1. Verifica que los archivos existen
 ls static/img/
@@ -190,6 +201,7 @@ Ctrl+Shift+N y accede a http://localhost:3000/temas
 ```
 
 ### Footer está gris (no blanco):
+
 ```bash
 # 1. Verifica que Bootstrap 5 CDN carga
 # Abre F12 → Network → Busca "bootstrap"
@@ -201,6 +213,7 @@ Ctrl+Shift+N y accede a http://localhost:3000/temas
 ```
 
 ### Rutas no funcionan:
+
 ```bash
 # 1. Verifica que el servidor está corriendo
 # Terminal debe mostrar: "Servidor corriendo en http://localhost:3000"
@@ -242,4 +255,4 @@ Cuando TODOS los puntos abajo sean ✅, tu reorganización está completa:
 
 **¡Una vez todo esté ✅, tu proyecto está listo!** 🎉
 
-*Último check: Febrero 8, 2026*
+_Último check: Febrero 8, 2026_

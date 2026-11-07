@@ -34,13 +34,27 @@ router.post('/docente/cursos/:id/eliminar', ownCourse, docenteController.elimina
 // ── Constructor de Contenido (Módulos, Lecciones y Recursos) ──
 router.get('/docente/cursos/:id/contenido', ownCourse, docenteController.getContenidoCurso);
 router.post('/docente/cursos/:id/modulo/crear', ownCourse, validarModulo, docenteController.crearModulo);
-router.post('/docente/cursos/:id/modulo/:moduloId/leccion/crear', ownCourse, validarLeccion, docenteController.crearLeccion);
-router.post('/docente/cursos/:id/modulo/:moduloId/leccion/:leccionId/eliminar', ownCourse, docenteController.eliminarLeccion);
+router.post(
+    '/docente/cursos/:id/modulo/:moduloId/leccion/crear',
+    ownCourse,
+    validarLeccion,
+    docenteController.crearLeccion
+);
+router.post(
+    '/docente/cursos/:id/modulo/:moduloId/leccion/:leccionId/eliminar',
+    ownCourse,
+    docenteController.eliminarLeccion
+);
 router.post('/docente/cursos/:id/recurso/crear', ownCourse, validarRecurso, docenteController.crearRecurso);
 router.post('/docente/cursos/:id/recurso/:rId/eliminar', ownCourse, docenteController.eliminarRecurso);
 
 // ── Revisión de Proyectos Prácticos ──
 router.get('/docente/proyectos', docenteController.getProyectos);
-router.post('/docente/proyectos/:id/retroalimentar', validarProyectoId, validarRetroalimentacion, docenteController.retroalimentarProyecto);
+router.post(
+    '/docente/proyectos/:id/retroalimentar',
+    validarProyectoId,
+    validarRetroalimentacion,
+    docenteController.retroalimentarProyecto
+);
 
 module.exports = router;

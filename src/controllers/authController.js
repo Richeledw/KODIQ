@@ -36,7 +36,9 @@ exports.getRegistro = (req, res) => {
 exports.postRegistro = async (req, res) => {
     // SEGURIDAD: forzamos string y normalizamos el email antes de cualquier consulta.
     const nombre = String(req.body.nombre || '').trim();
-    const email = String(req.body.email || '').trim().toLowerCase();
+    const email = String(req.body.email || '')
+        .trim()
+        .toLowerCase();
     const password = String(req.body.password || '');
     let errors = [];
 
@@ -92,7 +94,7 @@ exports.postRegistro = async (req, res) => {
         const rolesLabel = { estudiante: 'Estudiante', docente: 'Docente', admin: 'Administrador' };
         const nombreSeguro = _escapeHtml(nombre);
         const message = `Hola ${nombre},\n\nGracias por unirte a Eduplat como ${rolesLabel[rolSolicitado]}. Estamos emocionados de tenerte aquí.`;
-        const html    = `<p>Hola <strong>${nombreSeguro}</strong>,</p><p>Gracias por unirte a Eduplat como <strong>${rolesLabel[rolSolicitado]}</strong>. Estamos emocionados de tenerte aquí.</p>`;
+        const html = `<p>Hola <strong>${nombreSeguro}</strong>,</p><p>Gracias por unirte a Eduplat como <strong>${rolesLabel[rolSolicitado]}</strong>. Estamos emocionados de tenerte aquí.</p>`;
 
         try {
             await sendEmail({
@@ -112,10 +114,12 @@ exports.postRegistro = async (req, res) => {
                 console.error('Error al hacer auto-login después del registro:', err);
                 return res.redirect('/login');
             }
-            req.flash('success_msg', `¡Bienvenido, ${nombre}! Tu cuenta de ${rolesLabel[rolSolicitado]} ha sido creada.`);
+            req.flash(
+                'success_msg',
+                `¡Bienvenido, ${nombre}! Tu cuenta de ${rolesLabel[rolSolicitado]} ha sido creada.`
+            );
             return res.redirect(_panelByRole(rolSolicitado));
         });
-
     } catch (err) {
         console.error('Error en el registro del usuario:', err);
         res.status(500).render('error', {
@@ -146,7 +150,9 @@ exports.getLogin = (req, res) => {
  */
 exports.postLogin = (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
-        if (err) { return next(err); }
+        if (err) {
+            return next(err);
+        }
 
         if (!user) {
             req.flash('error', info ? info.message : 'Credenciales incorrectas');
@@ -154,7 +160,9 @@ exports.postLogin = (req, res, next) => {
         }
 
         req.login(user, (loginErr) => {
-            if (loginErr) { return next(loginErr); }
+            if (loginErr) {
+                return next(loginErr);
+            }
             // Redirigir según el rol del usuario
             return res.redirect(_panelByRole(user.rol));
         });
@@ -168,7 +176,9 @@ exports.postLogin = (req, res, next) => {
  */
 exports.postLogout = (req, res, next) => {
     req.logout((err) => {
-        if (err) { return next(err); }
+        if (err) {
+            return next(err);
+        }
         if (!req.session) {
             return res.redirect('/');
         }
@@ -187,9 +197,12 @@ exports.postLogout = (req, res, next) => {
  */
 function _panelByRole(rol) {
     switch (rol) {
-        case 'admin':    return '/admin/dashboard';
-        case 'docente':  return '/docente/dashboard';
-        default:         return '/panel';   // estudiante
+        case 'admin':
+            return '/admin/dashboard';
+        case 'docente':
+            return '/docente/dashboard';
+        default:
+            return '/panel'; // estudiante
     }
 }
 
@@ -224,7 +237,9 @@ exports.getOlvidePassword = (req, res) => {
  */
 exports.postOlvidePassword = async (req, res) => {
     // SEGURIDAD: string + normalización para evitar inyección NoSQL y variantes de email.
-    const email = String(req.body.email || '').trim().toLowerCase();
+    const email = String(req.body.email || '')
+        .trim()
+        .toLowerCase();
     try {
         if (!email) {
             req.flash('error_msg', 'Por favor ingresa tu correo electrónico.');
@@ -233,7 +248,10 @@ exports.postOlvidePassword = async (req, res) => {
 
         const user = await User.findOne({ email }).collation({ locale: 'en', strength: 2 });
         if (!user) {
-            req.flash('success_msg', 'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento.');
+            req.flash(
+                'success_msg',
+                'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento.'
+            );
             return res.redirect('/olvide-password');
         }
 
@@ -292,12 +310,14 @@ exports.postOlvidePassword = async (req, res) => {
         }
 
         // Mensaje genérico (no revela si el email existe) y enlace de preview escapado en la vista.
-        req.flash('success_msg', 'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento en tu bandeja de entrada.');
+        req.flash(
+            'success_msg',
+            'Si el correo está registrado en Eduplat, recibirás un enlace de restablecimiento en tu bandeja de entrada.'
+        );
         if (mailResult && mailResult.previewUrl && process.env.NODE_ENV !== 'production') {
             req.flash('reset_preview_url', mailResult.previewUrl);
         }
         res.redirect('/olvide-password');
-
     } catch (err) {
         console.error('Error en postOlvidePassword:', err);
         req.flash('error_msg', 'Ocurrió un error al procesar la solicitud.');
@@ -378,7 +398,6 @@ exports.postResetPassword = async (req, res) => {
 
         req.flash('success_msg', '¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva clave.');
         res.redirect('/login');
-
     } catch (err) {
         console.error('Error en postResetPassword:', err);
         req.flash('error_msg', 'Error al guardar la nueva contraseña.');

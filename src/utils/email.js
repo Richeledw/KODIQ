@@ -13,6 +13,11 @@ const nodemailer = require('nodemailer');
  * @returns {Promise<{success: boolean, previewUrl?: string, error?: string}>}
  */
 const sendEmail = async (options) => {
+    // En entorno de tests evitamos conexiones de red a Ethereal o servidores SMTP externos
+    if (process.env.NODE_ENV === 'test') {
+        return { success: true, previewUrl: 'http://test-email.local/preview' };
+    }
+
     try {
         const host = (process.env.SMTP_HOST || '').trim().toLowerCase();
         const user = (process.env.SMTP_EMAIL || '').trim();
@@ -26,7 +31,9 @@ const sendEmail = async (options) => {
         let transporter;
 
         if (isPlaceholder) {
-            console.warn('[EMAIL WARNING]: Credenciales SMTP sin configurar en .env (detectado placeholder). Generando cuenta de pruebas en Ethereal...');
+            console.warn(
+                '[EMAIL WARNING]: Credenciales SMTP sin configurar en .env (detectado placeholder). Generando cuenta de pruebas en Ethereal...'
+            );
             const testAccount = await nodemailer.createTestAccount();
             transporter = nodemailer.createTransport({
                 host: 'smtp.ethereal.email',

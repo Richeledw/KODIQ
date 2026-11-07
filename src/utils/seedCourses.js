@@ -11,7 +11,8 @@ const initialCourses = [
         id: 'html',
         titulo: 'HTML5 Básico & Semántico',
         descripcion: 'Aprende los fundamentos de HTML5 y la arquitectura web desde cero.',
-        descripcionLarga: 'HTML5 es la columna vertebral de la web moderna. En este curso aprenderás a estructurar contenido web de manera semántica, accesible y optimizada para motores de búsqueda, preparando tus páginas para aplicaciones complejas.',
+        descripcionLarga:
+            'HTML5 es la columna vertebral de la web moderna. En este curso aprenderás a estructurar contenido web de manera semántica, accesible y optimizada para motores de búsqueda, preparando tus páginas para aplicaciones complejas.',
         icono: '/img/html5.svg',
         categoria: 'web',
         nivel: 'Beginner',
@@ -22,7 +23,8 @@ const initialCourses = [
         autorNombre: 'Ing. Carlos Mendoza (EduPlat)',
         proyectoConsigna: {
             titulo: 'Landing Page de Portafolio Profesional Semántico',
-            descripcion: 'Diseña y estructura la página web principal de tu portafolio personal o de un producto tecnológico ficticio usando exclusivamente HTML5 semántico, accesibilidad (ARIA) y formularios validados.',
+            descripcion:
+                'Diseña y estructura la página web principal de tu portafolio personal o de un producto tecnológico ficticio usando exclusivamente HTML5 semántico, accesibilidad (ARIA) y formularios validados.',
             requisitos: [
                 'Uso correcto de etiquetas semánticas: <header>, <nav>, <main>, <section>, <article>, <aside>, <footer>',
                 'Estructura de metadatos completa en el <head> (Open Graph, favicon, viewport)',
@@ -37,8 +39,18 @@ const initialCourses = [
             ]
         },
         recursosGlobales: [
-            { titulo: 'Guía Completa HTML5 en PDF', tipo: 'pdf', url: 'https://developer.mozilla.org/es/docs/Web/HTML', descripcion: 'Manual de referencia de Mozilla Developer Network (MDN)' },
-            { titulo: 'Repositorio con Código Base en GitHub', tipo: 'github', url: 'https://github.com/mdn/learning-area', descripcion: 'Ejemplos de código y ejercicios prácticos listos para clonar' }
+            {
+                titulo: 'Guía Completa HTML5 en PDF',
+                tipo: 'pdf',
+                url: 'https://developer.mozilla.org/es/docs/Web/HTML',
+                descripcion: 'Manual de referencia de Mozilla Developer Network (MDN)'
+            },
+            {
+                titulo: 'Repositorio con Código Base en GitHub',
+                tipo: 'github',
+                url: 'https://github.com/mdn/learning-area',
+                descripcion: 'Ejemplos de código y ejercicios prácticos listos para clonar'
+            }
         ],
         modulos: [
             {
@@ -72,8 +84,18 @@ HTML (HyperText Markup Language) no es un lenguaje de programación, sino un len
 </html>`,
                         lenguajeCodigo: 'html',
                         recursos: [
-                            { titulo: 'Resumen de Sintaxis HTML5', tipo: 'pdf', url: 'https://html5doctor.com', descripcion: 'Guía rápida de sintaxis y elementos estructurales' },
-                            { titulo: 'Validador Oficial del W3C', tipo: 'link', url: 'https://validator.w3.org/', descripcion: 'Herramienta para comprobar la validez de tu código HTML' }
+                            {
+                                titulo: 'Resumen de Sintaxis HTML5',
+                                tipo: 'pdf',
+                                url: 'https://html5doctor.com',
+                                descripcion: 'Guía rápida de sintaxis y elementos estructurales'
+                            },
+                            {
+                                titulo: 'Validador Oficial del W3C',
+                                tipo: 'link',
+                                url: 'https://validator.w3.org/',
+                                descripcion: 'Herramienta para comprobar la validez de tu código HTML'
+                            }
                         ],
                         orden: 1
                     },
@@ -110,7 +132,12 @@ Antes de HTML5, los desarrolladores usaban \`<div class="header">\`, \`<div clas
 </footer>`,
                         lenguajeCodigo: 'html',
                         recursos: [
-                            { titulo: 'Diagrama Semántico HTML5 (CheatSheet)', tipo: 'link', url: 'https://htmlreference.io/', descripcion: 'Guía visual e interactiva de todos los elementos' }
+                            {
+                                titulo: 'Diagrama Semántico HTML5 (CheatSheet)',
+                                tipo: 'link',
+                                url: 'https://htmlreference.io/',
+                                descripcion: 'Guía visual e interactiva de todos los elementos'
+                            }
                         ],
                         orden: 2
                     }
@@ -118,7 +145,8 @@ Antes de HTML5, los desarrolladores usaban \`<div class="header">\`, \`<div clas
             },
             {
                 titulo: 'Módulo 2: Formularios, Multimedia y Accesibilidad',
-                descripcion: 'Aprende a capturar datos de usuarios con validaciones nativas y a incrustar contenido multimedia.',
+                descripcion:
+                    'Aprende a capturar datos de usuarios con validaciones nativas y a incrustar contenido multimedia.',
                 orden: 2,
                 lecciones: [
                     {
@@ -147,7 +175,12 @@ Los formularios permiten la interacción bidireccional entre usuario y servidor.
 </form>`,
                         lenguajeCodigo: 'html',
                         recursos: [
-                            { titulo: 'Formularios Accesibles MDN', tipo: 'link', url: 'https://developer.mozilla.org/es/docs/Learn/Forms', descripcion: 'Guía paso a paso para formularios profesionales' }
+                            {
+                                titulo: 'Formularios Accesibles MDN',
+                                tipo: 'link',
+                                url: 'https://developer.mozilla.org/es/docs/Learn/Forms',
+                                descripcion: 'Guía paso a paso para formularios profesionales'
+                            }
                         ],
                         orden: 1
                     }
@@ -159,7 +192,8 @@ Los formularios permiten la interacción bidireccional entre usuario y servidor.
         id: 'css',
         titulo: 'CSS3 Esencial & Flexbox / Grid',
         descripcion: 'Domina el diseño, maquetación moderna y estilos web con CSS3.',
-        descripcionLarga: 'Lleva tus páginas web al siguiente nivel visual aprendiendo la cascada, herencia, especificidad, y los dos sistemas de maquetación más potentes: Flexbox unidimensional y CSS Grid bidimensional.',
+        descripcionLarga:
+            'Lleva tus páginas web al siguiente nivel visual aprendiendo la cascada, herencia, especificidad, y los dos sistemas de maquetación más potentes: Flexbox unidimensional y CSS Grid bidimensional.',
         icono: '/img/css3-alt.svg',
         categoria: 'web',
         nivel: 'Beginner',
@@ -170,7 +204,8 @@ Los formularios permiten la interacción bidireccional entre usuario y servidor.
         autorNombre: 'Diseñadora Laura Soto (EduPlat)',
         proyectoConsigna: {
             titulo: 'Dashboard UI Responsive con Flexbox y CSS Grid',
-            descripcion: 'Maqueta un panel de administración moderno con modo oscuro/claro mediante variables CSS, barra lateral colapsable, tarjetas métricas y grid interactivo.',
+            descripcion:
+                'Maqueta un panel de administración moderno con modo oscuro/claro mediante variables CSS, barra lateral colapsable, tarjetas métricas y grid interactivo.',
             requisitos: [
                 'Uso de CSS Custom Properties (--variables)',
                 'Maquetación del layout principal con CSS Grid',
@@ -178,14 +213,21 @@ Los formularios permiten la interacción bidireccional entre usuario y servidor.
                 'Efectos visuales modernos (glassmorphism, transiciones suaves, sombras sutiles)',
                 '100% responsivo para pantallas móviles, tablets y monitores ultrawide'
             ],
-            recursosApoyo: [
-                'Paleta de colores HSL para dashboards',
-                'Iconografía y assets listos para usar'
-            ]
+            recursosApoyo: ['Paleta de colores HSL para dashboards', 'Iconografía y assets listos para usar']
         },
         recursosGlobales: [
-            { titulo: 'Guía Visual de Flexbox', tipo: 'pdf', url: 'https://css-tricks.com/snippets/css/a-guide-to-flexbox/', descripcion: 'La referencia definitiva de propiedades Flexbox' },
-            { titulo: 'Guía Completa de CSS Grid', tipo: 'link', url: 'https://css-tricks.com/snippets/css/complete-guide-grid/', descripcion: 'Todo sobre containers, items y áreas en Grid' }
+            {
+                titulo: 'Guía Visual de Flexbox',
+                tipo: 'pdf',
+                url: 'https://css-tricks.com/snippets/css/a-guide-to-flexbox/',
+                descripcion: 'La referencia definitiva de propiedades Flexbox'
+            },
+            {
+                titulo: 'Guía Completa de CSS Grid',
+                tipo: 'link',
+                url: 'https://css-tricks.com/snippets/css/complete-guide-grid/',
+                descripcion: 'Todo sobre containers, items y áreas en Grid'
+            }
         ],
         modulos: [
             {
@@ -223,7 +265,12 @@ Siempre inicia tus hojas de estilo con \`box-sizing: border-box\` para evitar qu
 }`,
                         lenguajeCodigo: 'css',
                         recursos: [
-                            { titulo: 'Cheat Sheet de Modelo de Caja', tipo: 'pdf', url: 'https://developer.mozilla.org', descripcion: 'Resumen visual descargable' }
+                            {
+                                titulo: 'Cheat Sheet de Modelo de Caja',
+                                tipo: 'pdf',
+                                url: 'https://developer.mozilla.org',
+                                descripcion: 'Resumen visual descargable'
+                            }
                         ],
                         orden: 1
                     }
@@ -263,7 +310,12 @@ Flexbox permite distribuir el espacio y alinear elementos a lo largo de un eje p
 }`,
                         lenguajeCodigo: 'css',
                         recursos: [
-                            { titulo: 'Flexbox Froggy Juego Interactivo', tipo: 'link', url: 'https://flexboxfroggy.com/#es', descripcion: 'Práctica interactiva para afianzar Flexbox jugando' }
+                            {
+                                titulo: 'Flexbox Froggy Juego Interactivo',
+                                tipo: 'link',
+                                url: 'https://flexboxfroggy.com/#es',
+                                descripcion: 'Práctica interactiva para afianzar Flexbox jugando'
+                            }
                         ],
                         orden: 1
                     }
@@ -275,7 +327,8 @@ Flexbox permite distribuir el espacio y alinear elementos a lo largo de un eje p
         id: 'javascript',
         titulo: 'JavaScript Moderno (ES6+)',
         descripcion: 'Aprende desde los fundamentos hasta manipulación del DOM, APIs y lógica avanzada.',
-        descripcionLarga: 'JavaScript es el motor de interactividad de la web. Domina variables modernas, desestructuración, async/await, promesas y consumo de APIs REST para construir aplicaciones vivas y dinámicas.',
+        descripcionLarga:
+            'JavaScript es el motor de interactividad de la web. Domina variables modernas, desestructuración, async/await, promesas y consumo de APIs REST para construir aplicaciones vivas y dinámicas.',
         icono: '/img/js.svg',
         categoria: 'web',
         nivel: 'Beginner',
@@ -286,7 +339,8 @@ Flexbox permite distribuir el espacio y alinear elementos a lo largo de un eje p
         autorNombre: 'Prof. Marcos Valenzuela (EduPlat)',
         proyectoConsigna: {
             titulo: 'Aplicación Web Interactiva de Gestión de Tareas con API y Persistencia',
-            descripcion: 'Crea una aplicación SPA de Productividad que consuma una API externa, gestione estado local mediante localStorage y permita crear, filtrar, editar y eliminar tareas con animaciones.',
+            descripcion:
+                'Crea una aplicación SPA de Productividad que consuma una API externa, gestione estado local mediante localStorage y permita crear, filtrar, editar y eliminar tareas con animaciones.',
             requisitos: [
                 'Uso de módulos ES6 y funciones flecha',
                 'Persistencia en localStorage para que no se pierdan datos al recargar',
@@ -300,7 +354,12 @@ Flexbox permite distribuir el espacio y alinear elementos a lo largo de un eje p
             ]
         },
         recursosGlobales: [
-            { titulo: 'JavaScript Info - El Tutorial Moderno', tipo: 'link', url: 'https://es.javascript.info/', descripcion: 'La documentación más completa y didáctica de JS en español' }
+            {
+                titulo: 'JavaScript Info - El Tutorial Moderno',
+                tipo: 'link',
+                url: 'https://es.javascript.info/',
+                descripcion: 'La documentación más completa y didáctica de JS en español'
+            }
         ],
         modulos: [
             {
@@ -335,7 +394,12 @@ const cursosEnMayuscula = cursos.map(curso => curso.toUpperCase());
 console.log(cursosEnMayuscula);`,
                         lenguajeCodigo: 'javascript',
                         recursos: [
-                            { titulo: 'Cheat Sheet ES6+ en PDF', tipo: 'pdf', url: 'https://es6cheatsheet.com/', descripcion: 'Resumen descargable de sintaxis moderna' }
+                            {
+                                titulo: 'Cheat Sheet ES6+ en PDF',
+                                tipo: 'pdf',
+                                url: 'https://es6cheatsheet.com/',
+                                descripcion: 'Resumen descargable de sintaxis moderna'
+                            }
                         ],
                         orden: 1
                     }
@@ -347,7 +411,8 @@ console.log(cursosEnMayuscula);`,
         id: 'python',
         titulo: 'Python Fundamental & Backend',
         descripcion: 'Aprende programación estructurada, POO y lógica con el lenguaje más popular.',
-        descripcionLarga: 'Python destaca por su sintaxis clara y su inmenso ecosistema: desde desarrollo web backend hasta ciencia de datos e inteligencia artificial.',
+        descripcionLarga:
+            'Python destaca por su sintaxis clara y su inmenso ecosistema: desde desarrollo web backend hasta ciencia de datos e inteligencia artificial.',
         icono: '/img/python.svg',
         categoria: 'backend',
         nivel: 'Beginner',
@@ -358,19 +423,22 @@ console.log(cursosEnMayuscula);`,
         autorNombre: 'Dr. Roberto Guzmán (EduPlat)',
         proyectoConsigna: {
             titulo: 'Sistema Backend de Gestión y Procesamiento de Datos',
-            descripcion: 'Construye un sistema modular en Python que procese registros, aplique Programación Orientada a Objetos y gestione archivos estructurados (JSON/CSV).',
+            descripcion:
+                'Construye un sistema modular en Python que procese registros, aplique Programación Orientada a Objetos y gestione archivos estructurados (JSON/CSV).',
             requisitos: [
                 'Modelado de clases y herencia en POO',
                 'Manejo de excepciones robusto',
                 'Lectura y escritura de archivos JSON persistentes'
             ],
-            recursosApoyo: [
-                'Guía de estilo PEP 8',
-                'Set de datos de prueba'
-            ]
+            recursosApoyo: ['Guía de estilo PEP 8', 'Set de datos de prueba']
         },
         recursosGlobales: [
-            { titulo: 'Documentación Oficial de Python 3', tipo: 'link', url: 'https://docs.python.org/es/3/', descripcion: 'Manual oficial en español' }
+            {
+                titulo: 'Documentación Oficial de Python 3',
+                tipo: 'link',
+                url: 'https://docs.python.org/es/3/',
+                descripcion: 'Manual oficial en español'
+            }
         ],
         modulos: [
             {
@@ -404,7 +472,12 @@ promedio = calcular_promedio(estudiante["calificaciones"])
 print(f"El promedio de {estudiante['nombre']} es {promedio:.2f}")`,
                         lenguajeCodigo: 'python',
                         recursos: [
-                            { titulo: 'Guía de Estilo PEP 8', tipo: 'link', url: 'https://pep8.org/', descripcion: 'Estándar oficial de formato de código Python' }
+                            {
+                                titulo: 'Guía de Estilo PEP 8',
+                                tipo: 'link',
+                                url: 'https://pep8.org/',
+                                descripcion: 'Estándar oficial de formato de código Python'
+                            }
                         ],
                         orden: 1
                     }
@@ -416,7 +489,8 @@ print(f"El promedio de {estudiante['nombre']} es {promedio:.2f}")`,
         id: 'sql',
         titulo: 'SQL & Bases de Datos Relacionales',
         descripcion: 'Domina el diseño relacional, modelado y consultas complejas con SQL.',
-        descripcionLarga: 'Los datos son el corazón de toda aplicación. Aprende diseño relacional, normalización, joins, agrupamientos y optimización de índices.',
+        descripcionLarga:
+            'Los datos son el corazón de toda aplicación. Aprende diseño relacional, normalización, joins, agrupamientos y optimización de índices.',
         icono: '/img/mysql.svg',
         categoria: 'backend',
         nivel: 'Beginner',
@@ -427,18 +501,22 @@ print(f"El promedio de {estudiante['nombre']} es {promedio:.2f}")`,
         autorNombre: 'Ing. Elena Rivas (EduPlat)',
         proyectoConsigna: {
             titulo: 'Esquema y Consultas de una Plataforma de E-Learning',
-            descripcion: 'Diseña el diagrama entidad-relación (ER) y redacta los scripts DDL/DML para una plataforma académica con usuarios, cursos, pagos y certificados.',
+            descripcion:
+                'Diseña el diagrama entidad-relación (ER) y redacta los scripts DDL/DML para una plataforma académica con usuarios, cursos, pagos y certificados.',
             requisitos: [
                 'Diseño de esquema en 3FN (Tercera Forma Normal)',
                 'Uso de Claves Foráneas con integridad referencial (CASCADE / SET NULL)',
                 'Consultas complejas con INNER JOIN, LEFT JOIN y GROUP BY'
             ],
-            recursosApoyo: [
-                'Diagrama de ejemplo en formato SQL'
-            ]
+            recursosApoyo: ['Diagrama de ejemplo en formato SQL']
         },
         recursosGlobales: [
-            { titulo: 'SQL Tutorial Interactivo', tipo: 'link', url: 'https://www.sqltutorial.org/', descripcion: 'Ejercicios interactivos paso a paso' }
+            {
+                titulo: 'SQL Tutorial Interactivo',
+                tipo: 'link',
+                url: 'https://www.sqltutorial.org/',
+                descripcion: 'Ejercicios interactivos paso a paso'
+            }
         ],
         modulos: [
             {
@@ -468,7 +546,12 @@ WHERE i.progreso > 50
 ORDER BY i.progreso DESC;`,
                         lenguajeCodigo: 'sql',
                         recursos: [
-                            { titulo: 'Hoja de Referencia SQL', tipo: 'pdf', url: 'https://learnsql.com/blog/sql-basics-cheat-sheet/', descripcion: 'Cheat sheet de comandos más usados' }
+                            {
+                                titulo: 'Hoja de Referencia SQL',
+                                tipo: 'pdf',
+                                url: 'https://learnsql.com/blog/sql-basics-cheat-sheet/',
+                                descripcion: 'Cheat sheet de comandos más usados'
+                            }
                         ],
                         orden: 1
                     }
@@ -480,7 +563,8 @@ ORDER BY i.progreso DESC;`,
         id: 'typescript',
         titulo: 'TypeScript Mastery & Arquitectura',
         descripcion: 'Tipado estricto, interfaces, genéricos y patrones de diseño modernos.',
-        descripcionLarga: 'Construye software a escala empresarial previniendo bugs en tiempo de desarrollo gracias al sistema de tipos estático más potente del ecosistema JavaScript.',
+        descripcionLarga:
+            'Construye software a escala empresarial previniendo bugs en tiempo de desarrollo gracias al sistema de tipos estático más potente del ecosistema JavaScript.',
         icono: '/img/typescript.svg',
         categoria: 'web',
         nivel: 'Advanced',
@@ -491,18 +575,22 @@ ORDER BY i.progreso DESC;`,
         autorNombre: 'Arq. David Torres (EduPlat)',
         proyectoConsigna: {
             titulo: 'Biblioteca de Tipos y SDK Tipado para una API REST',
-            descripcion: 'Desarrolla un cliente HTTP tipado con TypeScript que implemente Generics, Utility Types y validación en tiempo de compilación.',
+            descripcion:
+                'Desarrolla un cliente HTTP tipado con TypeScript que implemente Generics, Utility Types y validación en tiempo de compilación.',
             requisitos: [
                 'Uso de interfaces, types y genéricos (<T>)',
                 'Uso de Utility Types: Partial, Pick, Omit, Readonly',
                 'Configuración estricta en tsconfig.json'
             ],
-            recursosApoyo: [
-                'Handbook oficial de TypeScript'
-            ]
+            recursosApoyo: ['Handbook oficial de TypeScript']
         },
         recursosGlobales: [
-            { titulo: 'TypeScript Handbook Oficial', tipo: 'link', url: 'https://www.typescriptlang.org/docs/handbook/intro.html', descripcion: 'Guía oficial de TypeScript' }
+            {
+                titulo: 'TypeScript Handbook Oficial',
+                tipo: 'link',
+                url: 'https://www.typescriptlang.org/docs/handbook/intro.html',
+                descripcion: 'Guía oficial de TypeScript'
+            }
         ],
         modulos: [
             {
@@ -537,7 +625,12 @@ function procesarRespuesta<T>(respuesta: ApiResponse<T>): T {
 }`,
                         lenguajeCodigo: 'typescript',
                         recursos: [
-                            { titulo: 'TypeScript Cheat Sheet', tipo: 'pdf', url: 'https://www.typescriptlang.org/cheatsheets', descripcion: 'Resumen gráfico oficial' }
+                            {
+                                titulo: 'TypeScript Cheat Sheet',
+                                tipo: 'pdf',
+                                url: 'https://www.typescriptlang.org/cheatsheets',
+                                descripcion: 'Resumen gráfico oficial'
+                            }
                         ],
                         orden: 1
                     }

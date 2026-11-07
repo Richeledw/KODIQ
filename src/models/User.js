@@ -20,10 +20,7 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true,
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Por favor agrega un email válido'
-        ]
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Por favor agrega un email válido']
     },
     // Contraseña encriptada. Se marca 'select: false' para que no sea recuperada
     // por defecto en consultas a menos que se solicite de forma explícita.
@@ -41,27 +38,31 @@ const UserSchema = new mongoose.Schema({
         default: 'estudiante'
     },
     // Listado de cursos en los que el usuario se ha inscrito y su respectivo avance
-    cursosInscritos: [{
-        // Identificador único del curso (ej. 'html', 'css')
-        cursoId: {
-            type: String,
-            required: true
-        },
-        // Fecha en la que el usuario inició el curso
-        fechaInscripcion: {
-            type: Date,
-            default: Date.now
-        },
-        // Lista de IDs/slugs de las lecciones completadas por el estudiante en este curso
-        leccionesCompletadas: [{
-            type: String
-        }],
-        // Porcentaje general del progreso (de 0 a 100)
-        progreso: {
-            type: Number,
-            default: 0
+    cursosInscritos: [
+        {
+            // Identificador único del curso (ej. 'html', 'css')
+            cursoId: {
+                type: String,
+                required: true
+            },
+            // Fecha en la que el usuario inició el curso
+            fechaInscripcion: {
+                type: Date,
+                default: Date.now
+            },
+            // Lista de IDs/slugs de las lecciones completadas por el estudiante en este curso
+            leccionesCompletadas: [
+                {
+                    type: String
+                }
+            ],
+            // Porcentaje general del progreso (de 0 a 100)
+            progreso: {
+                type: Number,
+                default: 0
+            }
         }
-    }],
+    ],
     // Estado de la cuenta: activa o suspendida/desactivada
     activo: {
         type: Boolean,

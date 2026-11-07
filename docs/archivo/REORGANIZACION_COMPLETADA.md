@@ -13,6 +13,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 **Archivos modificados:** `app.js`
 
 **Rutas actualizadas:**
+
 - `'html': '/img/html5.svg'` (antes: `/static/img/html5.svg`)
 - `'css': '/img/css3-alt.svg'` (antes: `/static/img/css3-alt.svg`)
 - `'javascript': '/img/js.svg'` (antes: `/static/img/js.svg`)
@@ -23,6 +24,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 **Razon:** Express.static sirve archivos de `/static/` directamente en la raíz, por lo que no es necesario incluir "static" en las rutas HTML.
 
 **Verificación:**
+
 ```bash
 # Los logos ahora están en:
 /img/html5.svg
@@ -43,6 +45,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 **Cambio:** Cambiar todas las referencias de `/static/styles.css` a `/styles.css` y actualizar estilos del footer
 
 **Archivos modificados:**
+
 - `views/home.ejs`
 - `views/temas.ejs`
 - `views/curso.ejs`
@@ -51,6 +54,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 - `views/error.ejs`
 
 **Cambios en CSS:**
+
 - `bg-dark text-white` → Fondo oscuro y texto blanco
 - `text-muted` → `text-white-75` (texto gris ligero sobre fondo oscuro)
 - `text-muted-3` → `text-white` (enlaces en blanco)
@@ -68,22 +72,24 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 **Archivos modificados:** `views/temas.ejs`
 
 **Características implementadas:**
+
 1. ✅ Carga de logos SVG desde `/img/`
 2. ✅ Sistema de fallback con Font Awesome 6
 3. ✅ Mapeo de iconos por curso:
-   - HTML → `fa-html5` (rojo)
-   - CSS → `fa-css3-alt` (azul)
-   - JavaScript → `fa-js` (amarillo)
-   - Python → `fa-python` (azul)
-   - SQL → `fa-database` (rojo)
-   - TypeScript → `fa-code` (gris)
+    - HTML → `fa-html5` (rojo)
+    - CSS → `fa-css3-alt` (azul)
+    - JavaScript → `fa-js` (amarillo)
+    - Python → `fa-python` (azul)
+    - SQL → `fa-database` (rojo)
+    - TypeScript → `fa-code` (gris)
 4. ✅ Botón "Ver Curso" en cada tarjeta
 5. ✅ Mejor estructura visual
 
 **Código implementado:**
+
 ```ejs
-<img 
-    src="<%= curso.icono %>" 
+<img
+    src="<%= curso.icono %>"
     alt="<%= curso.titulo %>"
     onerror="this.parentElement.className += ' fallback-icon';"
 >
@@ -96,6 +102,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 **Cambio:** Cambiar `/static/styles.css` a `/styles.css` en todas las plantillas
 
 **Archivos modificados:**
+
 - `views/home.ejs` → `/styles.css`
 - `views/temas.ejs` → `/styles.css`
 - `views/curso.ejs` → `/styles.css`
@@ -109,6 +116,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 ### 5. **Verificación de Rutas Express** ✅
 
 **Rutas verificadas en app.js:**
+
 - ✅ `GET /` → Página de inicio
 - ✅ `GET /temas` → Listado de cursos
 - ✅ `GET /curso/:id` → Detalle de curso
@@ -118,6 +126,7 @@ Documentación de todos los cambios realizados para organizar el proyecto correc
 - ✅ `POST /contacto` → Procesar contacto
 
 **Botones "Volver":**
+
 - Course detail → `/temas` ✅ (en footer)
 - Navbar en todas las páginas → `/temas` ✅
 
@@ -157,12 +166,14 @@ proyecto/
 ## 🔄 Flujo de Carga de Archivos
 
 ### Antes:
+
 ```
 browser → /static/styles.css   ← Incorrecto (incluyendo "static" en la URL)
 browser → /static/img/html5.svg ← Incorrecto
 ```
 
 ### Ahora:
+
 ```
 browser → /styles.css           ← Correcto (Express sirve desde /static)
 browser → /img/html5.svg        ← Correcto
@@ -188,47 +199,48 @@ Express.static → static/        ← Middleware que mapea automáticamente
 ## 🚀 Próximas Pruebas Recomendadas
 
 1. **Iniciar el servidor:**
-   ```bash
-   npm run dev
-   ```
+
+    ```bash
+    npm run dev
+    ```
 
 2. **Verificar en navegador:**
-   - http://localhost:3000/ → Página de inicio
-   - http://localhost:3000/temas → Catálogo (ver logos SVG)
-   - http://localhost:3000/curso/python → Detalle (verificar botón volver)
-   - http://localhost:3000/contacto → Contacto (footer legible)
-   - http://localhost:3000/registro → Registro (footer legible)
+    - http://localhost:3000/ → Página de inicio
+    - http://localhost:3000/temas → Catálogo (ver logos SVG)
+    - http://localhost:3000/curso/python → Detalle (verificar botón volver)
+    - http://localhost:3000/contacto → Contacto (footer legible)
+    - http://localhost:3000/registro → Registro (footer legible)
 
 3. **Verificar en consola (F12):**
-   - No hay errores 404
-   - Los logos SVG cargan correctamente
-   - No hay referencias a `/static/img/` en el code
+    - No hay errores 404
+    - Los logos SVG cargan correctamente
+    - No hay referencias a `/static/img/` en el code
 
 4. **Verificar estructura de carpetas:**
-   ```bash
-   # Verificar que /static/ existe
-   ls -la static/
-   
-   # Verificar que /templates NO existe
-   ls -la templates/  # Debe fallar
-   
-   # Verificar que /views/ existe
-   ls -la views/
-   ```
+    ```bash
+    # Verificar que /static/ existe
+    ls -la static/
+
+    # Verificar que /templates NO existe
+    ls -la templates/  # Debe fallar
+
+    # Verificar que /views/ existe
+    ls -la views/
+    ```
 
 ---
 
 ## 📝 Resumen de Cambios por Archivo
 
-| Archivo | Cambios |
-|---------|---------|
-| app.js | 6 rutas de imágenes: `/static/img/` → `/img/` |
-| home.ejs | Referencia CSS + footer mejorado |
-| temas.ejs | Referencia CSS + footer mejorado + catálogo mejorado |
-| curso.ejs | Referencia CSS + footer mejorado |
-| contacto.ejs | Referencia CSS + footer mejorado |
-| registro.ejs | Referencia CSS + footer mejorado |
-| error.ejs | Referencia CSS + footer mejorado |
+| Archivo      | Cambios                                              |
+| ------------ | ---------------------------------------------------- |
+| app.js       | 6 rutas de imágenes: `/static/img/` → `/img/`        |
+| home.ejs     | Referencia CSS + footer mejorado                     |
+| temas.ejs    | Referencia CSS + footer mejorado + catálogo mejorado |
+| curso.ejs    | Referencia CSS + footer mejorado                     |
+| contacto.ejs | Referencia CSS + footer mejorado                     |
+| registro.ejs | Referencia CSS + footer mejorado                     |
+| error.ejs    | Referencia CSS + footer mejorado                     |
 
 **Total de cambios:** 30+ líneas modificadas en 7 archivos
 
@@ -256,4 +268,4 @@ Express.static → static/        ← Middleware que mapea automáticamente
 
 **¡Tu proyecto está completamente reorganizado y listo!** 🚀
 
-*Última actualización: Febrero 8, 2026*
+_Última actualización: Febrero 8, 2026_

@@ -18,20 +18,16 @@ const PRECACHE_URLS = [
 
 // ── Instalación: precachea recursos esenciales y offline.html ──
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
-    );
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
     self.skipWaiting();
 });
 
 // ── Activación: limpia cachés obsoletos ──
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) =>
-            Promise.all(
-                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-            )
-        )
+        caches
+            .keys()
+            .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
     );
     self.clients.claim();
 });
@@ -59,9 +55,7 @@ self.addEventListener('fetch', (event) => {
     // 1. Navegación HTML: Network-first con fallback a offline.html
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request).catch(() =>
-                caches.open(CACHE_NAME).then((cache) => cache.match(OFFLINE_URL))
-            )
+            fetch(request).catch(() => caches.open(CACHE_NAME).then((cache) => cache.match(OFFLINE_URL)))
         );
         return;
     }
@@ -79,12 +73,14 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) => {
                 return cache.match(request).then((cachedResponse) => {
-                    const fetchPromise = fetch(request).then((networkResponse) => {
-                        if (networkResponse && networkResponse.status === 200) {
-                            cache.put(request, networkResponse.clone());
-                        }
-                        return networkResponse;
-                    }).catch(() => null);
+                    const fetchPromise = fetch(request)
+                        .then((networkResponse) => {
+                            if (networkResponse && networkResponse.status === 200) {
+                                cache.put(request, networkResponse.clone());
+                            }
+                            return networkResponse;
+                        })
+                        .catch(() => null);
 
                     return cachedResponse || fetchPromise;
                 });

@@ -86,8 +86,8 @@ async function eliminarLeccion(cursoSlug, moduloId, leccionId) {
     }
     if (!modulo || !Array.isArray(modulo.lecciones)) throw new Error('Módulo no encontrado');
 
-    let indice = modulo.lecciones.findIndex((l) =>
-        String(l._id) === String(leccionId) || String(l.id) === String(leccionId)
+    let indice = modulo.lecciones.findIndex(
+        (l) => String(l._id) === String(leccionId) || String(l.id) === String(leccionId)
     );
     if (indice === -1 && /^\d+$/.test(String(leccionId))) {
         indice = Number(leccionId);
@@ -153,10 +153,7 @@ async function eliminarCursoCompleto(cursoSlug) {
     await Promise.all([
         Enrollment.deleteMany({ cursoId: slug }),
         StudentProject.deleteMany({ cursoId: slug }),
-        User.updateMany(
-            { cursosInscritos: slug },
-            { $pull: { cursosInscritos: slug } }
-        )
+        User.updateMany({ cursosInscritos: slug }, { $pull: { cursosInscritos: slug } })
     ]);
 
     return cursoEliminado;
@@ -167,7 +164,10 @@ async function eliminarCursoCompleto(cursoSlug) {
  * @param {string} proyectoId
  * @param {object} datos
  */
-async function aplicarRetroalimentacion(proyectoId, { calificacion, estado, comentario, evaluadorId, evaluadorNombre, evaluadorRol }) {
+async function aplicarRetroalimentacion(
+    proyectoId,
+    { calificacion, estado, comentario, evaluadorId, evaluadorNombre, evaluadorRol }
+) {
     const proyecto = await StudentProject.findById(proyectoId);
     if (!proyecto) throw new Error('Proyecto no encontrado');
 

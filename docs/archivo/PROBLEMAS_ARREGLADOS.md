@@ -7,35 +7,39 @@ Resumen de los problemas reportados y las soluciones aplicadas.
 ## 🔴 Problema 1: Error `mensaje_exito is not defined`
 
 ### ❌ **Estado Original:**
+
 ```
 ReferenceError: C:\Users\ASUS\Desktop\PROGRAMACIÓN\HTML\views\contacto.ejs:191
     mensaje_exito is not defined
 ```
 
 ### 🔍 **Causa:**
+
 La ruta GET `/contacto` no estaba pasando la variable `mensaje_exito` a la plantilla EJS, pero la plantilla intentaba acceder a ella en la línea 191.
 
 ### ✅ **Solución Implementada:**
 
 **En app.js (línea ~173):**
+
 ```javascript
 app.get('/contacto', (req, res) => {
-  const datosContacto = {
-    titulo: 'Contáctanos',
-    descripcion: 'Nos gustaría saber de ti',
-    email: 'info@eduplat.com',
-    telefono: '+54 9 1234567890',
-    ubicacion: 'Buenos Aires, Argentina'
-  };
-  // ✅ ARREGLADO: Ahora pasamos mensaje_exito
-  res.render('contacto', { 
-    datosContacto,
-    mensaje_exito: undefined  // Variable siempre disponible
-  });
+    const datosContacto = {
+        titulo: 'Contáctanos',
+        descripcion: 'Nos gustaría saber de ti',
+        email: 'info@eduplat.com',
+        telefono: '+54 9 1234567890',
+        ubicacion: 'Buenos Aires, Argentina'
+    };
+    // ✅ ARREGLADO: Ahora pasamos mensaje_exito
+    res.render('contacto', {
+        datosContacto,
+        mensaje_exito: undefined // Variable siempre disponible
+    });
 });
 ```
 
 **En views/contacto.ejs (línea ~191):**
+
 ```ejs
 <!-- ✅ MEJORADO: Validación más robusta -->
 <% if(typeof mensaje_exito !== 'undefined' && mensaje_exito) { %>
@@ -48,6 +52,7 @@ app.get('/contacto', (req, res) => {
 ```
 
 ### 📋 **Resultado:**
+
 ✅ Página `/contacto` ahora carga sin errores
 ✅ Mensaje de éxito aparece después de enviar el formulario
 ✅ No hay errores de variables no definidas
@@ -57,27 +62,33 @@ app.get('/contacto', (req, res) => {
 ## 🔴 Problema 2: Logos de Cursos No Aparecen
 
 ### ❌ **Estado Original:**
+
 - Los logos SVG (html5.svg, css3-alt.svg, etc.) no se estaban mostrando en las tarjetas de cursos
 - Las imágenes aparecían con icono roto
 
 ### 🔍 **Causa:**
+
 El middleware de archivos estáticos no estaba configurado correctamente para servir archivos SVG con el tipo MIME apropiado `image/svg+xml`.
 
 ### ✅ **Solución Implementada:**
 
 **En app.js (línea ~20):**
+
 ```javascript
 // ✅ ARREGLADO: Configurar tipos MIME correctamente
-app.use(express.static(path.join(__dirname, 'static'), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.svg')) {
-      res.type('image/svg+xml');
-    }
-  }
-}));
+app.use(
+    express.static(path.join(__dirname, 'static'), {
+        setHeaders: (res, path) => {
+            if (path.endsWith('.svg')) {
+                res.type('image/svg+xml');
+            }
+        }
+    })
+);
 ```
 
 **Archivos SVG disponibles en `/static/img/`:**
+
 - ✅ `html5.svg` - Logo HTML5
 - ✅ `css3-alt.svg` - Logo CSS3
 - ✅ `js.svg` - Logo JavaScript
@@ -90,20 +101,24 @@ app.use(express.static(path.join(__dirname, 'static'), {
 - ✅ `php.svg` - Logo PHP
 
 ### 📋 **Resultado:**
+
 ✅ Los logos SVG ahora se muestran correctamente en:
-  - Página de inicio (`/`) - Cursos destacados
-  - Página de cursos (`/temas`) - Grid de todos los cursos
-  - Páginas de detalle (`/curso/:id`) - Icono principal del curso
+
+- Página de inicio (`/`) - Cursos destacados
+- Página de cursos (`/temas`) - Grid de todos los cursos
+- Páginas de detalle (`/curso/:id`) - Icono principal del curso
 
 ---
 
 ## 🔴 Problema 3: Página de Registro "Desaparecida"
 
 ### ❌ **Estado Original:**
+
 - El usuario no podía encontrar la página de registro (`/registro`)
 - Aparentemente la página estaba "desaparecida"
 
 ### 🔍 **Causa:**
+
 La página de registro (`views/registro.ejs`) SÍ EXISTS, pero puede que no se estuviera renderizando correctamente por falta de datos en `app.js`.
 
 ### ✅ **Verificación y Confirmación:**
@@ -111,11 +126,11 @@ La página de registro (`views/registro.ejs`) SÍ EXISTS, pero puede que no se e
 ```javascript
 // ✅ CONFIRMADO: La ruta existe y funciona
 app.get('/registro', (req, res) => {
-  const datosRegistro = {
-    titulo: 'Crear Cuenta',
-    descripcion: 'Únete a nuestra comunidad de aprendizaje'
-  };
-  res.render('registro', { datosRegistro });
+    const datosRegistro = {
+        titulo: 'Crear Cuenta',
+        descripcion: 'Únete a nuestra comunidad de aprendizaje'
+    };
+    res.render('registro', { datosRegistro });
 });
 ```
 
@@ -124,6 +139,7 @@ app.get('/registro', (req, res) => {
 **URL accesible:** `http://localhost:3000/registro` ✅
 
 ### 📋 **Resultado:**
+
 ✅ La página de registro está disponible y funciona correctamente
 ✅ Se renderiza con Bootstrap 5 y Font Awesome 6
 ✅ El formulario es funcional (POST a `/registro`)
@@ -133,6 +149,7 @@ app.get('/registro', (req, res) => {
 ## 🔴 Problema 4: Pie de Página (Footer) No Está Bien Hecho
 
 ### ❌ **Estado Original:**
+
 - El footer no tenía estilos consistentes
 - Posible problema de alineación o espaciado
 
@@ -177,7 +194,7 @@ app.get('/registro', (req, res) => {
                 </div>
             </div>
         </div>
-        <hr class="bg-light">
+        <hr class="bg-light" />
         <div class="text-center text-muted small">
             <p>&copy; 2025 Eduplat - Todos los derechos reservados.</p>
         </div>
@@ -186,6 +203,7 @@ app.get('/registro', (req, res) => {
 ```
 
 **Características:**
+
 - ✅ Fondo oscuro (#1f2937) para contraste
 - ✅ 4 columnas: Logo, Enlaces, Contacto, Redes Sociales
 - ✅ Links funcionales usando Font Awesome 6
@@ -193,30 +211,33 @@ app.get('/registro', (req, res) => {
 - ✅ Consistente en todas las páginas
 
 ### 📋 **Resultado:**
+
 ✅ Footer ahora tiene:
-  - Estructura profesional
-  - Contenido completo
-  - Estilos consistentes
-  - Responsive design
-  - Links funcionales
+
+- Estructura profesional
+- Contenido completo
+- Estilos consistentes
+- Responsive design
+- Links funcionales
 
 ---
 
 ## 📊 Resumen de Cambios
 
-| Problema | Archivo | Línea | Estado |
-|----------|---------|-------|--------|
-| mensaje_exito no definido | `app.js` | 173-180 | ✅ Arreglado |
-| Error en contacto.ejs | `views/contacto.ejs` | 191 | ✅ Arreglado |
-| Logos SVG no se sirven | `app.js` | 20-27 | ✅ Arreglado |
-| Registro desaparecido | Verificado | N/A | ✅ Funciona |
-| Footer deficiente | `views/*` | Footer | ✅ Mejorado |
+| Problema                  | Archivo              | Línea   | Estado       |
+| ------------------------- | -------------------- | ------- | ------------ |
+| mensaje_exito no definido | `app.js`             | 173-180 | ✅ Arreglado |
+| Error en contacto.ejs     | `views/contacto.ejs` | 191     | ✅ Arreglado |
+| Logos SVG no se sirven    | `app.js`             | 20-27   | ✅ Arreglado |
+| Registro desaparecido     | Verificado           | N/A     | ✅ Funciona  |
+| Footer deficiente         | `views/*`            | Footer  | ✅ Mejorado  |
 
 ---
 
 ## 🧪 Cómo Verificar los Arreglos
 
 ### 1. Verificar que la página de contacto funciona:
+
 ```
 1. Abre: http://localhost:3000/contacto
 2. Completa el formulario
@@ -225,6 +246,7 @@ app.get('/registro', (req, res) => {
 ```
 
 ### 2. Verificar que los logos se ven:
+
 ```
 1. Abre: http://localhost:3000/
 2. Busca la sección "Cursos Destacados"
@@ -234,6 +256,7 @@ app.get('/registro', (req, res) => {
 ```
 
 ### 3. Verificar que el registro funciona:
+
 ```
 1. Abre: http://localhost:3000/registro
 2. Verifica que carga sin errores
@@ -243,6 +266,7 @@ app.get('/registro', (req, res) => {
 ```
 
 ### 4. Verificar el footer:
+
 ```
 1. Abre cualquier página
 2. Desplázate hacia el final
@@ -279,4 +303,4 @@ app.get('/registro', (req, res) => {
 
 **¡Todos los problemas han sido arreglados!** 🎉
 
-*Última actualización: Febrero 8, 2026*
+_Última actualización: Febrero 8, 2026_

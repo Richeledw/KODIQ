@@ -25,7 +25,7 @@ module.exports = async (req, res, next) => {
 
         if (!esAdmin && !esAutor) {
             req.flash('error_msg', 'No tienes permiso para gestionar este curso.');
-            return res.status(403).redirect('/docente/dashboard');
+            return res.redirect(403, '/docente/dashboard');
         }
 
         req.curso = curso; // disponible para los controladores si lo quieren reutilizar

@@ -8,7 +8,7 @@ async function toggleLeccionCompletada(cursoId, leccionId) {
     try {
         const res = await fetch(`/curso/${cursoId}/leccion/${leccionId}/completar`, {
             method: 'POST',
-            headers: { 'Accept': 'application/json' }
+            headers: { Accept: 'application/json' }
         });
         const data = await res.json();
         if (data.success) {
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await fetch(endpointUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                     body: JSON.stringify({ respuestas })
                 });
                 const data = await res.json();

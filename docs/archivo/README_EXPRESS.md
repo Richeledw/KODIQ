@@ -32,6 +32,7 @@ npm install
 ```
 
 Esto instalará todas las dependencias del archivo `package.json`:
+
 - **express**: Framework web minimalista
 - **ejs**: Motor de plantillas
 - **nodemon** (dev): Reinicia automáticamente el servidor en cambios
@@ -39,11 +40,13 @@ Esto instalará todas las dependencias del archivo `package.json`:
 ### 2. Iniciar el Servidor
 
 **Modo Desarrollo** (con nodemon - reinicia automáticamente):
+
 ```bash
 npm run dev
 ```
 
 **Modo Producción**:
+
 ```bash
 npm start
 ```
@@ -96,12 +99,14 @@ eduplat/
 El archivo principal `app.js` está organizado en 5 secciones:
 
 #### 1. **Configuración de EJS y Vistas**
+
 ```javascript
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 ```
 
 #### 2. **Middleware**
+
 ```javascript
 app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.urlencoded({ extended: true }));
@@ -109,6 +114,7 @@ app.use(express.json());
 ```
 
 #### 3. **Datos de Cursos** (Base de datos simulada)
+
 ```javascript
 const cursos = {
   'html': { id: 'html', titulo: 'HTML Básico', ... },
@@ -118,6 +124,7 @@ const cursos = {
 ```
 
 #### 4. **Rutas Principales**
+
 - `GET /` → Página de inicio
 - `GET /temas` → Listado de cursos
 - `GET /registro` → Formulario de registro
@@ -126,6 +133,7 @@ const cursos = {
 - `POST /contacto` → Procesar contacto
 
 #### 5. **Rutas Dinámicas**
+
 - `GET /curso/:id` → Detalle del curso
 
 ---
@@ -134,20 +142,20 @@ const cursos = {
 
 ### Rutas Estáticas
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/` | Página de inicio |
-| GET | `/temas` | Listado de todos los cursos |
-| GET | `/registro` | Formulario de registro |
-| POST | `/registro` | Procesar datos del registro |
-| GET | `/contacto` | Formulario de contacto |
-| POST | `/contacto` | Procesar mensaje de contacto |
+| Método | Ruta        | Descripción                  |
+| ------ | ----------- | ---------------------------- |
+| GET    | `/`         | Página de inicio             |
+| GET    | `/temas`    | Listado de todos los cursos  |
+| GET    | `/registro` | Formulario de registro       |
+| POST   | `/registro` | Procesar datos del registro  |
+| GET    | `/contacto` | Formulario de contacto       |
+| POST   | `/contacto` | Procesar mensaje de contacto |
 
 ### Rutas Dinámicas
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/curso/:id` | Detalle de un curso específico |
+| Método | Ruta         | Descripción                    |
+| ------ | ------------ | ------------------------------ |
+| GET    | `/curso/:id` | Detalle de un curso específico |
 
 #### Cursos Disponibles (IDs)
 
@@ -161,6 +169,7 @@ const cursos = {
 ```
 
 **Ejemplo:**
+
 ```
 http://localhost:3000/curso/python
 http://localhost:3000/curso/javascript
@@ -175,6 +184,7 @@ http://localhost:3000/curso/javascript
 Es la plantilla más completa que renderiza cursos dinámicamente:
 
 **Variables que recibe:**
+
 ```javascript
 {
   datosCurso: {
@@ -195,6 +205,7 @@ Es la plantilla más completa que renderiza cursos dinámicamente:
 ```
 
 **Características:**
+
 - Header con gradiente y información del curso
 - Descripción detallada
 - Listado de lecciones
@@ -205,13 +216,13 @@ Es la plantilla más completa que renderiza cursos dinámicamente:
 
 ### Otras Plantillas
 
-| Plantilla | Propósito |
-|-----------|-----------|
-| `home.ejs` | Página de inicio con cursos destacados |
-| `temas.ejs` | Listado completo de cursos |
-| `registro.ejs` | Formulario de registro con validación |
-| `contacto.ejs` | Formulario de contacto y información |
-| `error.ejs` | Página de error 404 personalizada |
+| Plantilla      | Propósito                              |
+| -------------- | -------------------------------------- |
+| `home.ejs`     | Página de inicio con cursos destacados |
+| `temas.ejs`    | Listado completo de cursos             |
+| `registro.ejs` | Formulario de registro con validación  |
+| `contacto.ejs` | Formulario de contacto y información   |
+| `error.ejs`    | Página de error 404 personalizada      |
 
 ---
 
@@ -222,17 +233,17 @@ Es la plantilla más completa que renderiza cursos dinámicamente:
 ```javascript
 // En app.js
 app.get('/curso/:id', (req, res) => {
-  const { id } = req.params;
-  const curso = cursos[id];
-  
-  if (!curso) {
-    return res.status(404).render('error', {
-      mensaje: 'Curso no encontrado',
-      descripcion: 'El curso que buscas no existe.'
-    });
-  }
+    const { id } = req.params;
+    const curso = cursos[id];
 
-  res.render('curso', { datosCurso: curso });
+    if (!curso) {
+        return res.status(404).render('error', {
+            mensaje: 'Curso no encontrado',
+            descripcion: 'El curso que buscas no existe.'
+        });
+    }
+
+    res.render('curso', { datosCurso: curso });
 });
 ```
 
@@ -241,20 +252,20 @@ app.get('/curso/:id', (req, res) => {
 ```javascript
 // Agregar a la base de datos simulada
 const cursos = {
-  // ... cursos existentes ...
-  'react': {
-    id: 'react',
-    titulo: 'React.js Avanzado',
-    descripcion: 'Crea interfaces modernas con React...',
-    icono: '/static/img/react.svg',
-    categoria: 'web',
-    nivel: 'Intermediate',
-    calificacion: 4.8,
-    resenas: 187,
-    duracion: '16 horas',
-    lecciones: 40,
-    color: 'warning'
-  }
+    // ... cursos existentes ...
+    react: {
+        id: 'react',
+        titulo: 'React.js Avanzado',
+        descripcion: 'Crea interfaces modernas con React...',
+        icono: '/static/img/react.svg',
+        categoria: 'web',
+        nivel: 'Intermediate',
+        calificacion: 4.8,
+        resenas: 187,
+        duracion: '16 horas',
+        lecciones: 40,
+        color: 'warning'
+    }
 };
 ```
 
@@ -284,21 +295,23 @@ const cursos = {
 ### Cambiar Puerto
 
 En `app.js`, línea ~170:
+
 ```javascript
-const PORT = process.env.PORT || 3000;  // Cambia 3000 por otro puerto
+const PORT = process.env.PORT || 3000; // Cambia 3000 por otro puerto
 ```
 
 ### Agregar Datos del Curso
 
 Edita el objeto `cursos` en `app.js` (líneas ~30-125):
+
 ```javascript
 const cursos = {
-  'mi-curso': {
-    id: 'mi-curso',
-    titulo: 'Mi Nuevo Curso',
-    descripcion: 'Descripción del curso...',
-    // ... más propiedades
-  }
+    'mi-curso': {
+        id: 'mi-curso',
+        titulo: 'Mi Nuevo Curso',
+        descripcion: 'Descripción del curso...'
+        // ... más propiedades
+    }
 };
 ```
 
@@ -312,13 +325,14 @@ Las plantillas usan **Bootstrap 5.3** vía CDN. Para personalizar:
 ### Cambiar Colores
 
 Los colores están definidos en CSS:
+
 ```css
 :root {
-  --color-primary: #3b82f6;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #06b6d4;
+    --color-primary: #3b82f6;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-info: #06b6d4;
 }
 ```
 
@@ -349,7 +363,7 @@ Los colores están definidos en CSS:
 ✅ SVG para iconos locales  
 ✅ Código limpio y escalable  
 ✅ Formularios con método GET/POST  
-✅ Manejo de errores 404  
+✅ Manejo de errores 404
 
 ---
 

@@ -39,9 +39,7 @@ exports.getDashboard = async (req, res) => {
             .limit(8)
             .select('nombre email rol activo creadoEn');
 
-        const ultimosCursos = await Course.find()
-            .sort({ creadoEn: -1 })
-            .limit(6);
+        const ultimosCursos = await Course.find().sort({ creadoEn: -1 }).limit(6);
 
         res.render('admin/dashboard', {
             titlePage: 'Panel de Administrador',
@@ -107,7 +105,7 @@ exports.cambiarRol = async (req, res) => {
             return res.redirect('/admin/usuarios');
         }
 
-        if (usuario.rol === 'admin' && rol !== 'admin' && usuario.activo && await esUltimoAdminActivo(id)) {
+        if (usuario.rol === 'admin' && rol !== 'admin' && usuario.activo && (await esUltimoAdminActivo(id))) {
             req.flash('error_msg', 'No puedes degradar al último administrador activo.');
             return res.redirect('/admin/usuarios');
         }
@@ -128,7 +126,9 @@ exports.editarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
         const nombre = String(req.body.nombre || '').trim();
-        const email = String(req.body.email || '').trim().toLowerCase();
+        const email = String(req.body.email || '')
+            .trim()
+            .toLowerCase();
         const rol = String(req.body.rol || 'estudiante');
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -152,13 +152,15 @@ exports.editarUsuario = async (req, res) => {
             return res.redirect('/admin/usuarios');
         }
 
-        if (usuario.rol === 'admin' && rol !== 'admin' && usuario.activo && await esUltimoAdminActivo(id)) {
+        if (usuario.rol === 'admin' && rol !== 'admin' && usuario.activo && (await esUltimoAdminActivo(id))) {
             req.flash('error_msg', 'No puedes degradar al último administrador activo.');
             return res.redirect('/admin/usuarios');
         }
 
-        const emailExiste = await User.findOne({ email, _id: { $ne: usuario._id } })
-            .collation({ locale: 'en', strength: 2 });
+        const emailExiste = await User.findOne({ email, _id: { $ne: usuario._id } }).collation({
+            locale: 'en',
+            strength: 2
+        });
         if (emailExiste) {
             req.flash('error_msg', 'Ese correo electrónico ya está registrado por otra cuenta.');
             return res.redirect('/admin/usuarios');
@@ -198,7 +200,7 @@ exports.toggleEstadoUsuario = async (req, res) => {
             return res.redirect('/admin/usuarios');
         }
 
-        if (usuario.rol === 'admin' && usuario.activo && await esUltimoAdminActivo(id)) {
+        if (usuario.rol === 'admin' && usuario.activo && (await esUltimoAdminActivo(id))) {
             req.flash('error_msg', 'No puedes desactivar al último administrador activo.');
             return res.redirect('/admin/usuarios');
         }
@@ -206,7 +208,10 @@ exports.toggleEstadoUsuario = async (req, res) => {
         usuario.activo = !usuario.activo;
         await usuario.save();
 
-        req.flash('success_msg', `Cuenta de ${usuario.nombre} ${usuario.activo ? 'activada' : 'desactivada'} correctamente.`);
+        req.flash(
+            'success_msg',
+            `Cuenta de ${usuario.nombre} ${usuario.activo ? 'activada' : 'desactivada'} correctamente.`
+        );
         res.redirect('/admin/usuarios');
     } catch (err) {
         logger.error({ err }, 'Error al alternar estado de usuario');
@@ -235,7 +240,7 @@ exports.eliminarUsuario = async (req, res) => {
             return res.redirect('/admin/usuarios');
         }
 
-        if (usuario.rol === 'admin' && usuario.activo && await esUltimoAdminActivo(id)) {
+        if (usuario.rol === 'admin' && usuario.activo && (await esUltimoAdminActivo(id))) {
             req.flash('error_msg', 'No puedes eliminar al último administrador activo.');
             return res.redirect('/admin/usuarios');
         }

@@ -7,6 +7,7 @@
 
 const express = require('express');
 const path = require('path');
+const os = require('os');
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default;
@@ -33,30 +34,38 @@ if (isProduction) {
 
 // Cabeceras HTTP seguras
 // TODO(seguridad): migrar los scripts inline restantes y usar nonces para eliminar 'unsafe-inline'.
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
-            scriptSrcAttr: ["'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
-            styleSrcAttr: ["'unsafe-inline'"],
-            fontSrc: ["'self'", 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com', 'data:'],
-            imgSrc: ["'self'", 'data:', 'https:'],
-            connectSrc: ["'self'"],
-            frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
-            mediaSrc: ["'self'", 'https:'],
-            objectSrc: ["'none'"],
-            baseUri: ["'self'"],
-            formAction: ["'self'"],
-            frameAncestors: ["'self'"],
-            workerSrc: ["'self'", 'blob:'],
-            manifestSrc: ["'self'"],
-            upgradeInsecureRequests: isProduction ? [] : null
-        }
-    },
-    crossOriginEmbedderPolicy: false
-}));
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
+                scriptSrcAttr: ["'unsafe-inline'"],
+                styleSrc: [
+                    "'self'",
+                    "'unsafe-inline'",
+                    'https://cdn.jsdelivr.net',
+                    'https://cdnjs.cloudflare.com',
+                    'https://fonts.googleapis.com'
+                ],
+                styleSrcAttr: ["'unsafe-inline'"],
+                fontSrc: ["'self'", 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com', 'data:'],
+                imgSrc: ["'self'", 'data:', 'https:'],
+                connectSrc: ["'self'"],
+                frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
+                mediaSrc: ["'self'", 'https:'],
+                objectSrc: ["'none'"],
+                baseUri: ["'self'"],
+                formAction: ["'self'"],
+                frameAncestors: ["'self'"],
+                workerSrc: ["'self'", 'blob:'],
+                manifestSrc: ["'self'"],
+                upgradeInsecureRequests: isProduction ? [] : null
+            }
+        },
+        crossOriginEmbedderPolicy: false
+    })
+);
 
 // Comprimir respuestas de texto para optimizar ancho de banda
 app.use(compression());
@@ -64,30 +73,34 @@ app.use(compression());
 // Configurar estrategias de Passport para el manejo de sesiones de usuario
 require('./src/config/passport')(passport);
 
-// Establecer la conexión con MongoDB
-connectDB();
+// Establecer la conexión con MongoDB (solo fuera del entorno de tests)
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 // Configuración del motor de vistas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Servir archivos estáticos desde /public con cabeceras nosniff, caché optimizado y aislamiento CSP para /uploads
-app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: isProduction ? '7d' : 0,
-    setHeaders: (res, filePath) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        if (filePath.endsWith('.svg')) {
-            res.type('image/svg+xml');
+app.use(
+    express.static(path.join(__dirname, 'public'), {
+        maxAge: isProduction ? '7d' : 0,
+        setHeaders: (res, filePath) => {
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            if (filePath.endsWith('.svg')) {
+                res.type('image/svg+xml');
+            }
+            if (filePath.endsWith('.webmanifest')) {
+                res.type('application/manifest+json');
+            }
+            if (filePath.includes(`${path.sep}uploads${path.sep}`)) {
+                res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
+                res.setHeader('Cache-Control', 'no-store, max-age=0');
+            }
         }
-        if (filePath.endsWith('.webmanifest')) {
-            res.type('application/manifest+json');
-        }
-        if (filePath.includes(`${path.sep}uploads${path.sep}`)) {
-            res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
-            res.setHeader('Cache-Control', 'no-store, max-age=0');
-        }
-    }
-}));
+    })
+);
 
 // Body parsers
 app.use(express.urlencoded({ extended: true }));
@@ -97,19 +110,33 @@ app.use(express.json());
 app.use(mongoSanitize({ replaceWith: '_' }));
 
 // Configuración de Sesiones con almacenamiento persistente en MongoDB
-app.use(session({
-    name: 'eduplat.sid',
-    secret: env.sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: env.mongoUri }),
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: isProduction
-    }
-}));
+const mongoSessionUrl = process.env.NODE_ENV === 'test' && process.env.MONGO_URI ? process.env.MONGO_URI : env.mongoUri;
+
+const sessionStore =
+    mongoose.connection && mongoose.connection.readyState === 1
+        ? MongoStore.create({ client: mongoose.connection.getClient() })
+        : MongoStore.create({
+              mongoUrl: mongoSessionUrl,
+              mongoOptions: {
+                  runtimeAdapters: { os }
+              }
+          });
+
+app.use(
+    session({
+        name: 'eduplat.sid',
+        secret: env.sessionSecret,
+        resave: false,
+        saveUninitialized: false,
+        store: sessionStore,
+        cookie: {
+            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: isProduction
+        }
+    })
+);
 
 // Inicializar Passport y conectar con la sesión
 app.use(passport.initialize());
@@ -126,16 +153,16 @@ app.use((req, res, next) => {
     res.locals.success_msg = req.flash ? req.flash('success_msg') : null;
     res.locals.error_msg = req.flash ? req.flash('error_msg') : null;
     res.locals.error = req.flash ? req.flash('error') : null;
-    res.locals.reset_preview_url = req.flash ? (req.flash('reset_preview_url')[0] || null) : null;
+    res.locals.reset_preview_url = req.flash ? req.flash('reset_preview_url')[0] || null : null;
     next();
 });
 
 // Importación y montaje de rutas modulares
-const indexRoutes   = require('./src/routes/indexRoutes');
-const authRoutes    = require('./src/routes/authRoutes');
-const panelRoutes   = require('./src/routes/panelRoutes');
-const cursoRoutes   = require('./src/routes/cursoRoutes');
-const adminRoutes   = require('./src/routes/adminRoutes');
+const indexRoutes = require('./src/routes/indexRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const panelRoutes = require('./src/routes/panelRoutes');
+const cursoRoutes = require('./src/routes/cursoRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 const docenteRoutes = require('./src/routes/docenteRoutes');
 
 app.use('/', indexRoutes);
@@ -155,19 +182,30 @@ app.use((req, res) => {
 });
 
 // Middleware global de manejo de errores (500)
-app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-    logger.error({ err: err.message, stack: err.stack, url: req.originalUrl, method: req.method }, 'Error no controlado en la aplicación');
+app.use((err, req, res, _next) => {
+    logger.error(
+        { err: err.message, stack: err.stack, url: req.originalUrl, method: req.method },
+        'Error no controlado en la aplicación'
+    );
     res.status(500).render('error', {
         mensaje: 'Error interno del servidor',
-        descripcion: isProduction ? 'Ocurrió un error inesperado. Por favor, inténtalo más tarde.' : (err.message || 'Error en el servidor'),
+        descripcion: isProduction
+            ? 'Ocurrió un error inesperado. Por favor, inténtalo más tarde.'
+            : err.message || 'Error en el servidor',
         status: 500
     });
 });
 
-// Arrancar el servidor HTTP
-const server = app.listen(PORT, () => {
-    logger.info(`Servidor corriendo exitosamente en: http://localhost:${PORT}`);
-});
+// Arrancar el servidor HTTP solo si se ejecuta como aplicación (no en tests)
+let server;
+if (process.env.NODE_ENV !== 'test') {
+    server = app.listen(PORT, () => {
+        logger.info(`Servidor corriendo exitosamente en: http://localhost:${PORT}`);
+    });
+
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+}
 
 // Captura de rechazos no controlados en promesas
 process.on('unhandledRejection', (reason) => {
@@ -182,16 +220,20 @@ process.on('uncaughtException', (err) => {
 // Apagado limpio (Graceful Shutdown)
 function gracefulShutdown(signal) {
     logger.info(`Recibida señal ${signal}. Cerrando servidor limpiamente...`);
-    server.close(() => {
-        logger.info('Servidor HTTP detenido.');
-        mongoose.connection.close(false).then(() => {
-            logger.info('Conexión con MongoDB cerrada.');
-            process.exit(0);
-        }).catch(() => process.exit(0));
-    });
+    if (server) {
+        server.close(() => {
+            logger.info('Servidor HTTP detenido.');
+            mongoose.connection
+                .close(false)
+                .then(() => {
+                    logger.info('Conexión con MongoDB cerrada.');
+                    process.exit(0);
+                })
+                .catch(() => process.exit(0));
+        });
+    } else {
+        process.exit(0);
+    }
 }
-
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 module.exports = app;

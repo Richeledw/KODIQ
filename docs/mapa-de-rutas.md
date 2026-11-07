@@ -55,21 +55,21 @@ http://localhost:3000
 
 ### Rutas Estáticas
 
-| # | Método | Ruta | Plantilla | Descripción |
-|---|--------|------|-----------|-------------|
-| 1 | GET | `/` | `home.ejs` | Página de inicio con hero y cursos destacados |
-| 2 | GET | `/temas` | `temas.ejs` | Listado completo de todos los cursos |
-| 3 | GET | `/registro` | `registro.ejs` | Formulario de registro de usuarios |
-| 4 | POST | `/registro` | `home.ejs` | Procesa datos de registro |
-| 5 | GET | `/contacto` | `contacto.ejs` | Formulario de contacto y información |
-| 6 | POST | `/contacto` | `contacto.ejs` | Procesa mensaje de contacto |
-| 7 | * | `[otras]` | `error.ejs` | Página 404 para rutas no encontradas |
+| #   | Método | Ruta        | Plantilla      | Descripción                                   |
+| --- | ------ | ----------- | -------------- | --------------------------------------------- |
+| 1   | GET    | `/`         | `home.ejs`     | Página de inicio con hero y cursos destacados |
+| 2   | GET    | `/temas`    | `temas.ejs`    | Listado completo de todos los cursos          |
+| 3   | GET    | `/registro` | `registro.ejs` | Formulario de registro de usuarios            |
+| 4   | POST   | `/registro` | `home.ejs`     | Procesa datos de registro                     |
+| 5   | GET    | `/contacto` | `contacto.ejs` | Formulario de contacto y información          |
+| 6   | POST   | `/contacto` | `contacto.ejs` | Procesa mensaje de contacto                   |
+| 7   | *      | `[otras]`   | `error.ejs`    | Página 404 para rutas no encontradas          |
 
 ### Rutas Dinámicas
 
-| # | Método | Ruta | Plantilla | Descripción |
-|---|--------|------|-----------|-------------|
-| 8 | GET | `/curso/:id` | `curso.ejs` | Detalle dinámico de un curso específico |
+| #   | Método | Ruta         | Plantilla   | Descripción                             |
+| --- | ------ | ------------ | ----------- | --------------------------------------- |
+| 8   | GET    | `/curso/:id` | `curso.ejs` | Detalle dinámico de un curso específico |
 
 ---
 
@@ -137,14 +137,14 @@ La ruta dinámica `/curso/:id` espera el ID del curso. Los IDs disponibles son:
 
 #### Cursos Disponibles
 
-| ID | URL | Curso |
-|----|-----|-------|
-| `html` | `/curso/html` | 🏷️ HTML Básico |
-| `css` | `/curso/css` | 🏷️ CSS Esencial |
+| ID           | URL                 | Curso                      |
+| ------------ | ------------------- | -------------------------- |
+| `html`       | `/curso/html`       | 🏷️ HTML Básico             |
+| `css`        | `/curso/css`        | 🏷️ CSS Esencial            |
 | `javascript` | `/curso/javascript` | 🏷️ JavaScript Introducción |
-| `python` | `/curso/python` | 🏷️ Python Fundamental |
-| `sql` | `/curso/sql` | 🏷️ SQL Databases |
-| `typescript` | `/curso/typescript` | 🏷️ TypeScript Mastery |
+| `python`     | `/curso/python`     | 🏷️ Python Fundamental      |
+| `sql`        | `/curso/sql`        | 🏷️ SQL Databases           |
+| `typescript` | `/curso/typescript` | 🏷️ TypeScript Mastery      |
 
 #### URLs Completas
 
@@ -177,15 +177,16 @@ Con mensaje: "Curso no encontrado"
 ```javascript
 // app.js
 app.get('/', (req, res) => {
-  const datosHome = {
-    titulo: 'Eduplat - Aprende Online',
-    // ... más datos
-  };
-  res.render('home', { datosHome });
+    const datosHome = {
+        titulo: 'Eduplat - Aprende Online'
+        // ... más datos
+    };
+    res.render('home', { datosHome });
 });
 ```
 
 **Datos enviados a plantilla:**
+
 - `datosHome` (objeto con información de la página)
 
 **Plantilla:** `views/home.ejs`
@@ -196,15 +197,16 @@ app.get('/', (req, res) => {
 
 ```javascript
 app.get('/temas', (req, res) => {
-  const datosTemas = {
-    titulo: 'Nuestros Cursos',
-    cursos: Object.values(cursos)
-  };
-  res.render('temas', { datosTemas });
+    const datosTemas = {
+        titulo: 'Nuestros Cursos',
+        cursos: Object.values(cursos)
+    };
+    res.render('temas', { datosTemas });
 });
 ```
 
 **Datos enviados a plantilla:**
+
 - `datosTemas.titulo` (string)
 - `datosTemas.cursos` (array de 6 cursosos)
 
@@ -216,28 +218,29 @@ app.get('/temas', (req, res) => {
 
 ```javascript
 app.get('/curso/:id', (req, res) => {
-  const { id } = req.params;  // ← Obtiene ID de la URL
-  const curso = cursos[id];   // ← Busca en base de datos
+    const { id } = req.params; // ← Obtiene ID de la URL
+    const curso = cursos[id]; // ← Busca en base de datos
 
-  if (!curso) {
-    return res.status(404).render('error', {
-      mensaje: 'Curso no encontrado',
-      descripcion: 'No pudimos encontrar el curso que buscas.'
+    if (!curso) {
+        return res.status(404).render('error', {
+            mensaje: 'Curso no encontrado',
+            descripcion: 'No pudimos encontrar el curso que buscas.'
+        });
+    }
+
+    // ← Busca cursos relacionados
+    const cursosRelacionados = Object.values(cursos)
+        .filter((c) => c.categoria === curso.categoria && c.id !== id)
+        .slice(0, 3);
+
+    res.render('curso', {
+        datosCurso: { ...curso, cursos_relacionados: cursosRelacionados }
     });
-  }
-
-  // ← Busca cursos relacionados
-  const cursosRelacionados = Object.values(cursos)
-    .filter(c => c.categoria === curso.categoria && c.id !== id)
-    .slice(0, 3);
-
-  res.render('curso', {
-    datosCurso: { ...curso, cursos_relacionados: cursosRelacionados }
-  });
 });
 ```
 
 **Flujo:**
+
 1. Cliente visita `/curso/html`
 2. Servidor extrae `id = 'html'`
 3. Busca en objeto `cursos['html']`
@@ -245,6 +248,7 @@ app.get('/curso/:id', (req, res) => {
 5. Renderiza `curso.ejs` con datos completos
 
 **Datos enviados a plantilla:**
+
 - `datosCurso` (objeto completo del curso)
 - `datosCurso.cursos_relacionados` (array de 3 cursos)
 
@@ -256,9 +260,9 @@ app.get('/curso/:id', (req, res) => {
 
 ```javascript
 app.get('/registro', (req, res) => {
-  res.render('registro', {
-    titulo: 'Crea tu Cuenta'
-  });
+    res.render('registro', {
+        titulo: 'Crea tu Cuenta'
+    });
 });
 ```
 
@@ -270,27 +274,28 @@ app.get('/registro', (req, res) => {
 
 ```javascript
 app.post('/registro', (req, res) => {
-  const { nombre, email, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-  console.log(`Nuevoo registro:
+    console.log(`Nuevoo registro:
     Nombre: ${nombre}
     Email: ${email}
     Password: ${password}`);
 
-  // TODO: Guardar en base de datos
-  // TODO: Enviar email de confirmación
-  // TODO: Crear sesión de usuario
+    // TODO: Guardar en base de datos
+    // TODO: Enviar email de confirmación
+    // TODO: Crear sesión de usuario
 
-  res.render('home', {
-    datosHome: {
-      titulo: 'Eduplat - Aprende Online',
-      mensaje: '¡Registro exitoso! Bienvenido.'
-    }
-  });
+    res.render('home', {
+        datosHome: {
+            titulo: 'Eduplat - Aprende Online',
+            mensaje: '¡Registro exitoso! Bienvenido.'
+        }
+    });
 });
 ```
 
 **Datos recibidos:**
+
 - `req.body.nombre` (string)
 - `req.body.email` (string)
 - `req.body.password` (string)
@@ -318,25 +323,26 @@ app.get('/contacto', (req, res) => {
 
 ```javascript
 app.post('/contacto', (req, res) => {
-  const { nombre, email, asunto, mensaje } = req.body;
+    const { nombre, email, asunto, mensaje } = req.body;
 
-  console.log(`Nuevo mensaje de contacto:
+    console.log(`Nuevo mensaje de contacto:
     Nombre: ${nombre}
     Email: ${email}
     Asunto: ${asunto}
     Mensaje: ${mensaje}`);
 
-  // TODO: Enviar email
-  // TODO: Guardar en base de datos
+    // TODO: Enviar email
+    // TODO: Guardar en base de datos
 
-  res.render('contacto', {
-    titulo: 'Contáctanos',
-    mensaje_exito: '¡Hemos recibido tu mensaje! Te responderemos pronto.'
-  });
+    res.render('contacto', {
+        titulo: 'Contáctanos',
+        mensaje_exito: '¡Hemos recibido tu mensaje! Te responderemos pronto.'
+    });
 });
 ```
 
 **Datos recibidos:**
+
 - `req.body.nombre` (string)
 - `req.body.email` (string)
 - `req.body.asunto` (string)
@@ -350,10 +356,10 @@ app.post('/contacto', (req, res) => {
 
 ```javascript
 app.use((req, res) => {
-  res.status(404).render('error', {
-    mensaje: 'Página no encontrada',
-    descripcion: 'La dirección que solicitaste no existe.'
-  });
+    res.status(404).render('error', {
+        mensaje: 'Página no encontrada',
+        descripcion: 'La dirección que solicitaste no existe.'
+    });
 });
 ```
 
@@ -428,31 +434,32 @@ app.use((req, res) => {
 
 ## 🔐 Métodos HTTP Usados
 
-| Método | Propósito | Ejemplo |
-|--------|-----------|---------|
-| **GET** | Obtener dato/Renderizar página | `/`, `/temas`, `/curso/:id` |
-| **POST** | Enviar datos al servidor | `/registro`, `/contacto` |
-| **PUT** | Actualizar recurso completo | *No implementado* |
-| **DELETE** | Eliminar recurso | *No implementado* |
-| **PATCH** | Actualizar parcialmente | *No implementado* |
+| Método     | Propósito                      | Ejemplo                     |
+| ---------- | ------------------------------ | --------------------------- |
+| **GET**    | Obtener dato/Renderizar página | `/`, `/temas`, `/curso/:id` |
+| **POST**   | Enviar datos al servidor       | `/registro`, `/contacto`    |
+| **PUT**    | Actualizar recurso completo    | _No implementado_           |
+| **DELETE** | Eliminar recurso               | _No implementado_           |
+| **PATCH**  | Actualizar parcialmente        | _No implementado_           |
 
 ---
 
 ## 🌐 Códigos HTTP de Respuesta
 
-| Código | Significado | Ejemplo |
-|--------|-------------|---------|
-| **200** | OK - Solicitud exitosa | GET / ✅ |
-| **201** | Created - Recurso creado | POST /registro ✅ |
-| **302** | Redirect - Redirige | POST /contacto |
-| **404** | Not Found - No existente | GET /xyz ❌ |
-| **500** | Server Error - Error interno | *No implementado* |
+| Código  | Significado                  | Ejemplo           |
+| ------- | ---------------------------- | ----------------- |
+| **200** | OK - Solicitud exitosa       | GET / ✅          |
+| **201** | Created - Recurso creado     | POST /registro ✅ |
+| **302** | Redirect - Redirige          | POST /contacto    |
+| **404** | Not Found - No existente     | GET /xyz ❌       |
+| **500** | Server Error - Error interno | _No implementado_ |
 
 ---
 
 ## 🔗 Enlaces Internos por Página
 
 ### En home.ejs
+
 ```html
 <a href="/">Inicio</a>
 <a href="/temas">Explorar Cursos</a>
@@ -462,6 +469,7 @@ app.use((req, res) => {
 ```
 
 ### En temas.ejs
+
 ```html
 <a href="/">Inicio</a>
 <a href="/curso/<%= curso.id %>">Ver Detalle</a>
@@ -470,6 +478,7 @@ app.use((req, res) => {
 ```
 
 ### En curso.ejs
+
 ```html
 <a href="/temas">Volver a Cursos</a>
 <a href="/curso/<%= curso.id %>">Otro Curso</a>
@@ -478,6 +487,7 @@ app.use((req, res) => {
 ```
 
 ### En registro.ejs
+
 ```html
 <a href="/">Inicio</a>
 <a href="/temas">Ver Cursos</a>
@@ -485,6 +495,7 @@ app.use((req, res) => {
 ```
 
 ### En contacto.ejs
+
 ```html
 <a href="/">Inicio</a>
 <a href="/temas">Ver Cursos</a>
@@ -500,21 +511,24 @@ app.use((req, res) => {
 **Definición:** Parámetro obligatorio que especifica qué curso mostrar.
 
 **Acceso en código:**
+
 ```javascript
 const { id } = req.params;
 // Express automáticamente extrae "id" de la URL
 ```
 
 **Ejemplo:**
+
 ```
 URL: /curso/python
 req.params.id = 'python'
 ```
 
 **Validación:**
+
 ```javascript
 if (!cursos[id]) {
-  // El ID no existe → Error 404
+    // El ID no existe → Error 404
 }
 ```
 
@@ -529,6 +543,7 @@ http://localhost:3000/curso/javascript
 ```
 
 Esperado:
+
 - Carga la página de JavaScript
 - Muestra información, duración, lecciones
 - Muestra cursos relacionados
@@ -567,6 +582,7 @@ Esperado:
 ## 📚 Resumen Rápido
 
 **Rutas principales:**
+
 - `/` → Inicio
 - `/temas` → Todos los cursos
 - `/curso/:id` → Detalle del curso
@@ -574,14 +590,16 @@ Esperado:
 - `/contacto` → Formulario de contacto
 
 **Métodos:**
+
 - **GET** → Visualizar
 - **POST** → Enviar datos
 
 **Errores:**
+
 - `/xyz` → 404 Not Found
 
 ---
 
 **¡Navega libremente por la plataforma Eduplat!** 🚀✨
 
-*Versión 1.0.0 - Febrero 2025*
+_Versión 1.0.0 - Febrero 2025_

@@ -70,7 +70,7 @@
         const isAuthenticated = !!(user && (user.id || user.nombre));
 
         // A. Elementos de Invitado (Login / Registro / CTAs)
-        document.querySelectorAll('.nav-auth-guest, [data-auth="guest"], .btn-auth-guest').forEach(el => {
+        document.querySelectorAll('.nav-auth-guest, [data-auth="guest"], .btn-auth-guest').forEach((el) => {
             if (isAuthenticated) {
                 el.style.setProperty('display', 'none', 'important');
                 el.classList.add('d-none');
@@ -81,7 +81,7 @@
         });
 
         // B. Elementos de Usuario Autenticado
-        document.querySelectorAll('.nav-auth-user, [data-auth="user"], .btn-auth-user').forEach(el => {
+        document.querySelectorAll('.nav-auth-user, [data-auth="user"], .btn-auth-user').forEach((el) => {
             if (isAuthenticated) {
                 el.style.removeProperty('display');
                 el.classList.remove('d-none');
@@ -95,35 +95,35 @@
             const roleInfo = getRoleInfo(user.rol);
 
             // Actualizar enlaces al panel
-            document.querySelectorAll('.link-mi-panel').forEach(link => {
+            document.querySelectorAll('.link-mi-panel').forEach((link) => {
                 link.setAttribute('href', roleInfo.url);
             });
 
-            document.querySelectorAll('.link-mi-panel-text').forEach(span => {
+            document.querySelectorAll('.link-mi-panel-text').forEach((span) => {
                 span.textContent = roleInfo.label;
             });
 
-            document.querySelectorAll('.link-mi-panel-icon').forEach(icon => {
+            document.querySelectorAll('.link-mi-panel-icon').forEach((icon) => {
                 icon.className = `fas ${roleInfo.icon} text-muted link-mi-panel-icon`;
             });
 
             // Actualizar nombre
-            document.querySelectorAll('.user-display-name').forEach(span => {
+            document.querySelectorAll('.user-display-name').forEach((span) => {
                 span.textContent = user.nombre || 'Usuario';
             });
 
             // Actualizar email
-            document.querySelectorAll('.user-email-display').forEach(span => {
+            document.querySelectorAll('.user-email-display').forEach((span) => {
                 span.textContent = user.email || '';
             });
 
             // Actualizar rol
-            document.querySelectorAll('.user-role-badge').forEach(badge => {
+            document.querySelectorAll('.user-role-badge').forEach((badge) => {
                 badge.textContent = user.rol || 'estudiante';
             });
 
             // Actualizar avatar inicial
-            document.querySelectorAll('.user-avatar-badge').forEach(avatar => {
+            document.querySelectorAll('.user-avatar-badge').forEach((avatar) => {
                 if (user.nombre) {
                     avatar.textContent = user.nombre.charAt(0).toUpperCase();
                 }
@@ -132,15 +132,14 @@
     }
 
     // 2. Determinar usuario actual
-    let currentUser = (typeof window.EDUPLAT_USER !== 'undefined' && window.EDUPLAT_USER) 
-        ? window.EDUPLAT_USER 
-        : getStoredUser();
+    let currentUser =
+        typeof window.EDUPLAT_USER !== 'undefined' && window.EDUPLAT_USER ? window.EDUPLAT_USER : getStoredUser();
 
     // 3. Verificación asíncrona de respaldo con endpoint de sesión
     function verifySessionWithBackend() {
         fetch('/api/auth/session')
-            .then(res => res.json())
-            .then(data => {
+            .then((res) => res.json())
+            .then((data) => {
                 if (data && data.authenticated && data.user) {
                     setStoredUser(data.user);
                     applyAuthState(data.user);
@@ -158,7 +157,7 @@
 
     // 4. Limpieza en Cierre de Sesión (Logout)
     function attachLogoutListeners() {
-        document.querySelectorAll('a[href="/logout"], .btn-logout').forEach(btn => {
+        document.querySelectorAll('a[href="/logout"], .btn-logout').forEach((btn) => {
             btn.addEventListener('click', function () {
                 setStoredUser(null);
                 try {

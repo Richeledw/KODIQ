@@ -76,6 +76,7 @@ Cada curso en Eduplat está representado como un objeto con las siguientes propi
 Estos son los 6 cursos incluidos por defecto en Eduplat:
 
 ### 1. HTML Básico
+
 ```
 URL: /curso/html
 ID: html
@@ -87,6 +88,7 @@ Calificación: 4.5 ⭐ (234 reseñas)
 ```
 
 ### 2. CSS Esencial
+
 ```
 URL: /curso/css
 ID: css
@@ -98,6 +100,7 @@ Calificación: 4.7 ⭐ (189 reseñas)
 ```
 
 ### 3. JavaScript Introducción
+
 ```
 URL: /curso/javascript
 ID: javascript
@@ -109,6 +112,7 @@ Calificación: 4.8 ⭐ (312 reseñas)
 ```
 
 ### 4. Python Fundamental
+
 ```
 URL: /curso/python
 ID: python
@@ -120,6 +124,7 @@ Calificación: 4.9 ⭐ (267 reseñas)
 ```
 
 ### 5. SQL Databases
+
 ```
 URL: /curso/sql
 ID: sql
@@ -131,6 +136,7 @@ Calificación: 4.6 ⭐ (198 reseñas)
 ```
 
 ### 6. TypeScript Mastery
+
 ```
 URL: /curso/typescript
 ID: typescript
@@ -148,9 +154,9 @@ Calificación: 4.7 ⭐ (156 reseñas)
 ### Paso 1: Preparar el Logo SVG
 
 1. Coloca el logo SVG en `/static/img/` con un nombre descriptivo
-   - Ejemplo: `react.svg`
-   - Asegúrate que sea un archivo SVG válido
-   - Tamaño recomendado: 100x100px o mayor
+    - Ejemplo: `react.svg`
+    - Asegúrate que sea un archivo SVG válido
+    - Tamaño recomendado: 100x100px o mayor
 
 ### Paso 2: Abrir app.js
 
@@ -164,25 +170,25 @@ Agrega una nueva entrada al objeto `cursos`:
 
 ```javascript
 const cursos = {
-  // ... cursos existentes ...
+    // ... cursos existentes ...
 
-  'react': {
-    id: 'react',
-    titulo: 'React.js Avanzado',
-    descripcion: 'Domina React.js y crea aplicaciones dinámicas...',
-    icono: '/static/img/react.svg',
-    categoria: 'web',
-    nivel: 'Intermediate',
-    calificacion: 4.8,
-    resenas: 187,
-    duracion: '16 horas',
-    lecciones: 40,
-    color: 'info',
-    cursos_relacionados: [
-      { id: 'javascript', titulo: 'JavaScript Introducción' },
-      { id: 'typescript', titulo: 'TypeScript Mastery' }
-    ]
-  }
+    react: {
+        id: 'react',
+        titulo: 'React.js Avanzado',
+        descripcion: 'Domina React.js y crea aplicaciones dinámicas...',
+        icono: '/static/img/react.svg',
+        categoria: 'web',
+        nivel: 'Intermediate',
+        calificacion: 4.8,
+        resenas: 187,
+        duracion: '16 horas',
+        lecciones: 40,
+        color: 'info',
+        cursos_relacionados: [
+            { id: 'javascript', titulo: 'JavaScript Introducción' },
+            { id: 'typescript', titulo: 'TypeScript Mastery' }
+        ]
+    }
 };
 ```
 
@@ -250,6 +256,7 @@ En `app.js`, busca el curso y modifica:
 ### Categoría
 
 Valores recomendados:
+
 - `web` → Para cursos web (HTML, CSS, JavaScript, React)
 - `backend` → Para cursos de backend (Python, Node.js, Java)
 - `database` → Para cursos de bases de datos (SQL, MongoDB)
@@ -262,6 +269,7 @@ Puedes agregar más según necesites.
 ### Nivel
 
 Valores permitidos:
+
 - `Beginner` - Para principiantes (sin requisitos previos)
 - `Intermediate` - Nivel intermedio (requiere conocimientos básicos)
 - `Advanced` - Nivel avanzado (requiere experiencia previa)
@@ -270,16 +278,16 @@ Valores permitidos:
 
 Usa clases de color Bootstrap 5:
 
-| Clase | Color |
-|-------|-------|
-| `primary` | Azul principal |
-| `secondary` | Secundario |
-| `success` | Verde (éxito) |
-| `danger` | Rojo (peligro) |
-| `warning` | Naranja (advertencia) |
-| `info` | Azul (información) |
-| `light` | Gris claro |
-| `dark` | Gris oscuro |
+| Clase       | Color                 |
+| ----------- | --------------------- |
+| `primary`   | Azul principal        |
+| `secondary` | Secundario            |
+| `success`   | Verde (éxito)         |
+| `danger`    | Rojo (peligro)        |
+| `warning`   | Naranja (advertencia) |
+| `info`      | Azul (información)    |
+| `light`     | Gris claro            |
+| `dark`      | Gris oscuro           |
 
 ### Calificación
 
@@ -373,11 +381,13 @@ Usa clases de color Bootstrap 5:
 ### 1. Nombres de Cursos
 
 ✅ **Bueno:**
+
 - "Python Fundamental"
 - "Advanced JavaScript Techniques"
 - "Machine Learning with TensorFlow"
 
 ❌ **Evitar:**
+
 - "My Python Course"
 - "JavaScripttttt"
 - "LEARN EVERYTHING ABOUT WEB"
@@ -389,13 +399,15 @@ Usa clases de color Bootstrap 5:
 ### 2. Descripciones
 
 ✅ **Bueno:**
+
 ```
-Aprende HTML5 desde cero. Incluye estructura semántica, 
-formularios, multimedia y mejores prácticas. Al final, 
+Aprende HTML5 desde cero. Incluye estructura semántica,
+formularios, multimedia y mejores prácticas. Al final,
 crearás un portfolio profesional. Ideal para principiantes.
 ```
 
 ❌ **Evitar:**
+
 ```
 Un curso de HTML lol
 ```
@@ -407,6 +419,7 @@ Un curso de HTML lol
 ### 3. Duración
 
 Sé realista:
+
 - Beginner: 6-12 horas
 - Intermediate: 12-20 horas
 - Advanced: 18-30+ horas
@@ -418,6 +431,7 @@ Sé realista:
 ### 4. Lecciones
 
 Mantén la proporción:
+
 ```
 Beginner:     20-30 lecciones
 Intermediate: 30-50 lecciones
@@ -432,12 +446,12 @@ Usa colores consistentes por categoría:
 
 ```javascript
 const coloresPorCategoria = {
-  'web': 'primary',          // Azul para web
-  'backend': 'danger',       // Rojo para backend
-  'database': 'success',     // Verde para bases de datos
-  'data': 'info',            // Azul claro para datos
-  'mobile': 'warning',       // Naranja para móvil
-  'design': 'secondary'      // Gris para diseño
+    web: 'primary', // Azul para web
+    backend: 'danger', // Rojo para backend
+    database: 'success', // Verde para bases de datos
+    data: 'info', // Azul claro para datos
+    mobile: 'warning', // Naranja para móvil
+    design: 'secondary' // Gris para diseño
 };
 ```
 
@@ -485,25 +499,27 @@ html → css → javascript → nodejs → databases
 Para expansión masiva de cursos, considera:
 
 1. **Migrar a Base de Datos**
-   ```bash
-   npm install mongoose
-   # O
-   npm install sequelize pg
-   ```
+
+    ```bash
+    npm install mongoose
+    # O
+    npm install sequelize pg
+    ```
 
 2. **Crear Admin Panel**
-   - Interfaz para agregar/editar cursos
-   - Sin necesidad de editar código
+    - Interfaz para agregar/editar cursos
+    - Sin necesidad de editar código
 
 3. **Importar desde CSV**
-   ```javascript
-   npm install csv-parser
-   ```
+
+    ```javascript
+    npm install csv-parser
+    ```
 
 4. **Sincronizar con CMS Externo**
-   - Contentful
-   - Strapi
-   - WordPress API
+    - Contentful
+    - Strapi
+    - WordPress API
 
 ---
 
@@ -520,12 +536,14 @@ R: El segundo sobrescribirá al primero. Los IDs deben ser únicos.
 
 **P: ¿Cómo muestro solo algunos cursos?**
 R: En `app.js`, filtra el array antes de pasarlo a la plantilla:
+
 ```javascript
-const cursosFiltrados = Object.values(cursos).filter(c => c.categoria === 'web');
+const cursosFiltrados = Object.values(cursos).filter((c) => c.categoria === 'web');
 ```
 
 **P: ¿Puedo reordenar los cursos?**
 R: Sí, en `app.js` ordena antes de renderizar:
+
 ```javascript
 const cursosOrdenados = Object.values(cursos).sort((a, b) => b.calificacion - a.calificacion);
 ```
@@ -534,4 +552,4 @@ const cursosOrdenados = Object.values(cursos).sort((a, b) => b.calificacion - a.
 
 **¡Mantén tu catálogo de cursos actualizado y atractivo!** 📚✨
 
-*Versión 1.0.0 - Febrero 2025*
+_Versión 1.0.0 - Febrero 2025_

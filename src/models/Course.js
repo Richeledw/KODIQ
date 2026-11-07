@@ -68,10 +68,12 @@ const QuizQuestionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    opciones: [{
-        type: String,
-        required: true
-    }],
+    opciones: [
+        {
+            type: String,
+            required: true
+        }
+    ],
     respuestaCorrecta: {
         type: Number,
         required: true
@@ -172,12 +174,16 @@ const CourseSchema = new mongoose.Schema({
             type: String,
             default: 'Construye un proyecto completo aplicando todos los conceptos del curso.'
         },
-        requisitos: [{
-            type: String
-        }],
-        recursosApoyo: [{
-            type: String
-        }]
+        requisitos: [
+            {
+                type: String
+            }
+        ],
+        recursosApoyo: [
+            {
+                type: String
+            }
+        ]
     },
     // Módulos y lecciones
     modulos: [ModuleSchema],

@@ -57,6 +57,12 @@ router.get('/api/auth/session', (req, res) => {
 router.get('/olvide-password', redirectIfAuth, authController.getOlvidePassword);
 router.post('/olvide-password', forgotPasswordLimiter, validarOlvidePassword, authController.postOlvidePassword);
 router.get('/reset-password/:token', redirectIfAuth, validarTokenReset, authController.getResetPassword);
-router.post('/reset-password/:token', resetPasswordLimiter, validarTokenReset, validarResetPassword, authController.postResetPassword);
+router.post(
+    '/reset-password/:token',
+    resetPasswordLimiter,
+    validarTokenReset,
+    validarResetPassword,
+    authController.postResetPassword
+);
 
 module.exports = router;

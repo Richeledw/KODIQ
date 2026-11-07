@@ -7,11 +7,13 @@ Una guía paso a paso para instalar y ejecutar la plataforma Eduplat por primera
 ## ⚡ Inicio en 3 Pasos
 
 ### Paso 1: Instalar Dependencias
+
 ```bash
 npm install
 ```
 
 **¿Qué hace?**
+
 - Descarga e instala Express.js, EJS y nodemon
 - Crea la carpeta `node_modules/`
 - Genera el archivo `package-lock.json`
@@ -23,16 +25,19 @@ npm install
 ### Paso 2: Iniciar el Servidor
 
 **Para Desarrollo** (recomendado mientras trabajas):
+
 ```bash
 npm run dev
 ```
 
 **Para Producción**:
+
 ```bash
 npm start
 ```
 
 **Output esperado:**
+
 ```
 Server corriendo en http://localhost:3000
 Rutas disponibles:
@@ -50,6 +55,7 @@ Rutas disponibles:
 ### Paso 3: Abrir en Navegador
 
 Abre tu navegador y accede a:
+
 ```
 http://localhost:3000
 ```
@@ -63,12 +69,14 @@ http://localhost:3000
 Después de iniciar el servidor, puedes visitar:
 
 ### Páginas Estáticas
+
 - **Inicio:** http://localhost:3000/
 - **Todos los Cursos:** http://localhost:3000/temas
 - **Registro:** http://localhost:3000/registro
 - **Contacto:** http://localhost:3000/contacto
 
 ### Cursos Dinámicos
+
 - **HTML:** http://localhost:3000/curso/html
 - **CSS:** http://localhost:3000/curso/css
 - **JavaScript:** http://localhost:3000/curso/javascript
@@ -81,6 +89,7 @@ Después de iniciar el servidor, puedes visitar:
 ## 🛑 Detener el Servidor
 
 Presiona en la terminal:
+
 ```bash
 Ctrl + C
 ```
@@ -89,12 +98,12 @@ Ctrl + C
 
 ## 🔧 Comandos Útiles
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Iniciar en modo desarrollo (se reinicia al cambiar archivos) |
-| `npm start` | Iniciar en modo producción (requiere reinicio manual) |
-| `npm install` | Instalar todas las dependencias |
-| `npm install nombre-paquete` | Agregar un nuevo paquete |
+| Comando                      | Descripción                                                  |
+| ---------------------------- | ------------------------------------------------------------ |
+| `npm run dev`                | Iniciar en modo desarrollo (se reinicia al cambiar archivos) |
+| `npm start`                  | Iniciar en modo producción (requiere reinicio manual)        |
+| `npm install`                | Instalar todas las dependencias                              |
+| `npm install nombre-paquete` | Agregar un nuevo paquete                                     |
 
 ---
 
@@ -132,17 +141,20 @@ proyecto/
 ✅ **Logos SVG** personalizados  
 ✅ **Archivos Estáticos** servidos correctamente  
 ✅ **Validación de Formularios** básica  
-✅ **Manejo de Errores** 404 personalizado  
+✅ **Manejo de Errores** 404 personalizado
 
 ---
 
 ## 🤔 Errores Comunes
 
 ### ❌ Error: "Cannot find module 'express'"
+
 **Solución:** Ejecuta `npm install`
 
 ### ❌ Error: "Port 3000 already in use"
-**Solución:** 
+
+**Solución:**
+
 ```bash
 # Option 1: Usa otro puerto
 set PORT=3001
@@ -154,7 +166,9 @@ netstat -ano | findstr :3000    # Windows
 ```
 
 ### ❌ Error: "ENOENT: no such file or directory"
+
 **Solución:** Asegúrate de estar en la carpeta correcta, ejecuta:
+
 ```bash
 cd c:\Users\ASUS\Desktop\PROGRAMACIÓN\HTML
 npm install
@@ -198,6 +212,7 @@ npm run dev
 ## 🎨 Personalizar Colores
 
 Los cursos usan clases Bootstrap para colores:
+
 - `info` → Azul
 - `success` → Verde
 - `warning` → Naranja
@@ -224,6 +239,7 @@ npm install nombre-del-paquete
 ```
 
 **Ejemplos útiles:**
+
 ```bash
 npm install mongoose          # MongoDB
 npm install passport          # Autenticación
@@ -239,20 +255,22 @@ npm install cors              # CORS para APIs
 Para acceder desde otro dispositivo en la red:
 
 1. Obtén tu IP local:
-   ```bash
-   ipconfig | findstr "IPv4"  # Windows
-   ifconfig | grep inet        # MacOS/Linux
-   ```
+
+    ```bash
+    ipconfig | findstr "IPv4"  # Windows
+    ifconfig | grep inet        # MacOS/Linux
+    ```
 
 2. Inicia el servidor:
-   ```bash
-   npm run dev
-   ```
+
+    ```bash
+    npm run dev
+    ```
 
 3. Accede desde otro dispositivo:
-   ```
-   http://TU_IP:3000
-   ```
+    ```
+    http://TU_IP:3000
+    ```
 
 ---
 
@@ -287,4 +305,4 @@ Para más detalles, consulta **README_EXPRESS.md** (documentación completa).
 
 **¡Disfruta usando Eduplat!** 🎓✨
 
-*Versión 1.0.0 - Febrero 2025*
+_Versión 1.0.0 - Febrero 2025_

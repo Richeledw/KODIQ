@@ -66,7 +66,9 @@ exports.postContacto = async (req, res) => {
     try {
         // SEGURIDAD: forzamos string para que un body como email[$gt]= no llegue como objeto.
         const nombre = String(req.body.nombre || '').trim();
-        const email = String(req.body.email || '').trim().toLowerCase();
+        const email = String(req.body.email || '')
+            .trim()
+            .toLowerCase();
         const asunto = String(req.body.asunto || '').trim();
         const mensaje = String(req.body.mensaje || '').trim();
 
@@ -98,7 +100,8 @@ exports.postContacto = async (req, res) => {
                 telefono: '+54 9 1234567890',
                 ubicacion: 'Buenos Aires, Argentina'
             },
-            mensaje_exito: '¡Gracias por tu mensaje! Tu consulta ha sido registrada y nuestro equipo de soporte te responderá a la brevedad.'
+            mensaje_exito:
+                '¡Gracias por tu mensaje! Tu consulta ha sido registrada y nuestro equipo de soporte te responderá a la brevedad.'
         });
     } catch (err) {
         console.error('Error al guardar mensaje de contacto:', err);
@@ -148,7 +151,7 @@ exports.getSitemap = async (req, res) => {
 
         res.header('Content-Type', 'application/xml');
         res.send(xml);
-    } catch (err) {
+    } catch (_err) {
         res.status(500).end();
     }
 };

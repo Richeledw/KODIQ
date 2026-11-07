@@ -27,7 +27,19 @@ exports.getCursos = async (req, res) => {
 
 exports.crearCurso = async (req, res) => {
     try {
-        const { id, titulo, descripcion, descripcionLarga, categoria, nivel, duracion, icono, color, proyectoTitulo, proyectoDescripcion } = req.body;
+        const {
+            id,
+            titulo,
+            descripcion,
+            descripcionLarga,
+            categoria,
+            nivel,
+            duracion,
+            icono,
+            color,
+            proyectoTitulo,
+            proyectoDescripcion
+        } = req.body;
 
         const cursoExistente = await Course.findOne({ id: id.trim() });
         if (cursoExistente) {
@@ -70,7 +82,19 @@ exports.crearCurso = async (req, res) => {
 exports.editarCurso = async (req, res) => {
     try {
         const { id } = req.params;
-        const { titulo, descripcion, descripcionLarga, categoria, nivel, duracion, icono, color, publicado, proyectoTitulo, proyectoDescripcion } = req.body;
+        const {
+            titulo,
+            descripcion,
+            descripcionLarga,
+            categoria,
+            nivel,
+            duracion,
+            icono,
+            color,
+            publicado,
+            proyectoTitulo,
+            proyectoDescripcion
+        } = req.body;
 
         const cursoActualizado = await Course.findOneAndUpdate(
             { id },

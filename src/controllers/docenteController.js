@@ -5,7 +5,6 @@
  */
 
 const Course = require('../models/Course');
-const User = require('../models/User');
 const StudentProject = require('../models/StudentProject');
 const Enrollment = require('../models/Enrollment');
 const courseService = require('../services/courseService');
@@ -52,8 +51,24 @@ exports.getNuevoCurso = (req, res) => {
 
 exports.crearCurso = async (req, res) => {
     try {
-        const { id, titulo, descripcion, descripcionLarga, categoria, nivel, duracion, icono, color, proyectoTitulo, proyectoDescripcion } = req.body;
-        const cursoIdSlug = (id || titulo).toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        const {
+            id,
+            titulo,
+            descripcion,
+            descripcionLarga,
+            categoria,
+            nivel,
+            duracion,
+            icono,
+            color,
+            proyectoTitulo,
+            proyectoDescripcion
+        } = req.body;
+        const cursoIdSlug = (id || titulo)
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
 
         const cursoExistente = await Course.findOne({ id: cursoIdSlug });
         if (cursoExistente) {
@@ -76,7 +91,9 @@ exports.crearCurso = async (req, res) => {
             publicado: true,
             proyectoConsigna: {
                 titulo: proyectoTitulo || 'Proyecto Final del Curso',
-                descripcion: proyectoDescripcion || 'Aplica los conceptos impartidos en el curso construyendo una solución práctica.',
+                descripcion:
+                    proyectoDescripcion ||
+                    'Aplica los conceptos impartidos en el curso construyendo una solución práctica.',
                 requisitos: ['Estructura limpia', 'Documentación clara', 'Código funcional']
             },
             modulos: [
@@ -90,7 +107,8 @@ exports.crearCurso = async (req, res) => {
                             titulo: 'Bienvenida al Curso y Objetivos',
                             duracion: '10 min',
                             videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                            explicacionDetallada: 'Bienvenido. En esta lección inicial repasaremos las metas y requisitos del curso.',
+                            explicacionDetallada:
+                                'Bienvenido. En esta lección inicial repasaremos las metas y requisitos del curso.',
                             orden: 1
                         }
                     ]
@@ -98,7 +116,10 @@ exports.crearCurso = async (req, res) => {
             ]
         });
 
-        req.flash('success_msg', `¡Curso "${nuevoCurso.titulo}" creado exitosamente! Ahora puedes estructurar sus lecciones.`);
+        req.flash(
+            'success_msg',
+            `¡Curso "${nuevoCurso.titulo}" creado exitosamente! Ahora puedes estructurar sus lecciones.`
+        );
         res.redirect(`/docente/cursos/${nuevoCurso.id}/contenido`);
     } catch (err) {
         logger.error({ err }, 'Error al crear curso docente');
@@ -140,7 +161,18 @@ exports.getEditarCurso = async (req, res) => {
 exports.editarCurso = async (req, res) => {
     try {
         const { id } = req.params;
-        const { titulo, descripcion, descripcionLarga, categoria, nivel, duracion, icono, color, proyectoTitulo, proyectoDescripcion } = req.body;
+        const {
+            titulo,
+            descripcion,
+            descripcionLarga,
+            categoria,
+            nivel,
+            duracion,
+            icono,
+            color,
+            proyectoTitulo,
+            proyectoDescripcion
+        } = req.body;
 
         const curso = await Course.findOne({ id });
         if (!curso) {

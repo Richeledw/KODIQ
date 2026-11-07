@@ -87,11 +87,12 @@ async function obtenerInscripcion(estudianteId, curso) {
     if (inscripcion) {
         const completadas = normalizarCompletadas(curso, inscripcion.leccionesCompletadas);
         const total = obtenerLecciones(curso).length;
-        const progreso = total > 0
-            ? calcularProgreso(total, completadas.length)
-            : Math.min(100, Math.max(0, Number(inscripcion.progreso) || 0));
-        const cambio = completadas.length !== (inscripcion.leccionesCompletadas || []).length
-            || progreso !== inscripcion.progreso;
+        const progreso =
+            total > 0
+                ? calcularProgreso(total, completadas.length)
+                : Math.min(100, Math.max(0, Number(inscripcion.progreso) || 0));
+        const cambio =
+            completadas.length !== (inscripcion.leccionesCompletadas || []).length || progreso !== inscripcion.progreso;
 
         if (cambio) {
             inscripcion.leccionesCompletadas = completadas;
@@ -105,9 +106,8 @@ async function obtenerInscripcion(estudianteId, curso) {
 
     // Migracion perezosa desde el modelo legado.
     const usuario = await User.findById(estudianteId).select('cursosInscritos');
-    const legado = usuario && usuario.cursosInscritos
-        ? usuario.cursosInscritos.find((c) => c.cursoId === curso.id)
-        : null;
+    const legado =
+        usuario && usuario.cursosInscritos ? usuario.cursosInscritos.find((c) => c.cursoId === curso.id) : null;
 
     if (!legado) return null;
 
@@ -121,9 +121,10 @@ async function obtenerInscripcion(estudianteId, curso) {
             cursoId: curso.id,
             fechaInscripcion: legado.fechaInscripcion || new Date(),
             leccionesCompletadas: completadas,
-            progreso: total > 0
-                ? calcularProgreso(total, completadas.length)
-                : Math.min(100, Math.max(0, Number(legado.progreso) || 0)),
+            progreso:
+                total > 0
+                    ? calcularProgreso(total, completadas.length)
+                    : Math.min(100, Math.max(0, Number(legado.progreso) || 0)),
             ultimoAcceso: new Date()
         });
     } catch (err) {

@@ -18,16 +18,17 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
 
 // Pregunta sin mostrar lo que se escribe (para la contraseña)
-const askHidden = (q) => new Promise((resolve) => {
-    const out = rl.output;
-    const originalWrite = rl._writeToOutput;
-    rl.question(q, (answer) => {
-        rl._writeToOutput = originalWrite;
-        out.write('\n');
-        resolve(answer);
+const askHidden = (q) =>
+    new Promise((resolve) => {
+        const out = rl.output;
+        const originalWrite = rl._writeToOutput;
+        rl.question(q, (answer) => {
+            rl._writeToOutput = originalWrite;
+            out.write('\n');
+            resolve(answer);
+        });
+        rl._writeToOutput = () => {}; // silencia el eco mientras se escribe
     });
-    rl._writeToOutput = () => {}; // silencia el eco mientras se escribe
-});
 
 (async () => {
     try {

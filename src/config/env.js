@@ -18,7 +18,8 @@ const requiredEnvVars = [
     {
         name: 'SESSION_SECRET',
         validator: (val) => Boolean(val && val.length >= 16),
-        message: 'Falta SESSION_SECRET en .env o tiene menos de 16 caracteres. Genera uno seguro con: node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'hex\'))"'
+        message:
+            "Falta SESSION_SECRET en .env o tiene menos de 16 caracteres. Genera uno seguro con: node -e \"console.log(require('crypto').randomBytes(48).toString('hex'))\""
     }
 ];
 

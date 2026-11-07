@@ -48,7 +48,12 @@ router.post('/admin/cursos/:id/recurso/:rId/eliminar', adminController.eliminarR
 
 // ── Revisión de Proyectos Prácticos ──
 router.get('/admin/proyectos', adminController.getProyectos);
-router.post('/admin/proyectos/:id/retroalimentar', validarProyectoId, validarRetroalimentacion, adminController.retroalimentarProyecto);
+router.post(
+    '/admin/proyectos/:id/retroalimentar',
+    validarProyectoId,
+    validarRetroalimentacion,
+    adminController.retroalimentarProyecto
+);
 
 // ── Mensajes de Soporte y Contacto ──
 router.get('/admin/mensajes', adminController.getMensajes);

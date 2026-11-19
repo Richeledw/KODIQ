@@ -643,13 +643,18 @@ function procesarRespuesta<T>(respuesta: ApiResponse<T>): T {
 /**
  * @function seedCoursesIfNeeded
  * @description Inserta los cursos iniciales en MongoDB si la colección Course está vacía.
+ * Los módulos y lecciones se crean en sus propias colecciones (Module / Lesson) mediante
+ * contentService, que convierte el formato clásico de cada lección en bloques de contenido.
  */
 async function seedCoursesIfNeeded() {
     try {
         const count = await Course.countDocuments();
         if (count === 0) {
+            const contentService = require('../services/contentService');
             console.log('Sembrando cursos iniciales en MongoDB...');
-            await Course.insertMany(initialCourses);
+            for (const datos of initialCourses) {
+                await contentService.importarCurso(datos);
+            }
             console.log(`✓ Se sembraron ${initialCourses.length} cursos exitosamente en MongoDB.`);
         }
     } catch (error) {

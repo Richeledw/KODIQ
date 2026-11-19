@@ -6,11 +6,14 @@
 
 const Course = require('../../models/Course');
 const courseService = require('../../services/courseService');
+const contentService = require('../../services/contentService');
 const logger = require('../../utils/logger');
 
 exports.getCursos = async (req, res) => {
     try {
-        const cursos = await Course.find().sort({ creadoEn: -1 });
+        const cursosDocs = await Course.find().sort({ creadoEn: -1 });
+        const temarios = await contentService.cargarTemarios(cursosDocs);
+        const cursos = cursosDocs.map((c) => temarios.get(c.id) || c);
         res.render('admin/cursos', {
             titlePage: 'Gestión Global de Cursos',
             cursos
@@ -144,7 +147,7 @@ exports.eliminarCurso = async (req, res) => {
 exports.getContenidoCurso = async (req, res) => {
     try {
         const { id } = req.params;
-        const curso = await Course.findOne({ id });
+        const curso = await contentService.cargarCursoCompleto(id, { incluirBloques: true });
 
         if (!curso) {
             req.flash('error_msg', 'Curso no encontrado.');

@@ -10,6 +10,7 @@ const Enrollment = require('../models/Enrollment');
 const StudentProject = require('../models/StudentProject');
 const staticCursos = require('../models/cursosData');
 const progressService = require('../services/progressService');
+const contentService = require('../services/contentService');
 const path = require('path');
 const fs = require('fs');
 
@@ -27,11 +28,12 @@ exports.getPanel = async (req, res) => {
         }
 
         const allDbCourses = await Course.find();
+        const temarios = await contentService.cargarTemarios(allDbCourses);
 
         // Mapear cursos en un diccionario rápido por ID
         const cursosDict = {};
         allDbCourses.forEach((c) => {
-            cursosDict[c.id] = c;
+            cursosDict[c.id] = temarios.get(c.id) || c;
         });
 
         // Combinar con estáticos si alguno no está en BD

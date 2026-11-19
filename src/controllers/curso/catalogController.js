@@ -9,6 +9,7 @@ const Enrollment = require('../../models/Enrollment');
 const StudentProject = require('../../models/StudentProject');
 const staticCursos = require('../../models/cursosData');
 const progressService = require('../../services/progressService');
+const contentService = require('../../services/contentService');
 const logger = require('../../utils/logger');
 
 /**
@@ -25,10 +26,14 @@ function puedeVerCursoNoPublicado(curso, user) {
 
 exports.getTemas = async (req, res) => {
     try {
-        let cursos = await Course.find({ publicado: true }).sort({ creadoEn: -1 });
+        const cursosDocs = await Course.find({ publicado: true }).sort({ creadoEn: -1 });
+        let cursos;
 
-        if (!cursos || cursos.length === 0) {
+        if (!cursosDocs || cursosDocs.length === 0) {
             cursos = Object.values(staticCursos);
+        } else {
+            const temarios = await contentService.cargarTemarios(cursosDocs, { soloPublicado: true });
+            cursos = cursosDocs.map((c) => temarios.get(c.id) || c);
         }
 
         let inscritosIds = [];
@@ -59,7 +64,7 @@ exports.getCurso = async (req, res) => {
     const { id } = req.params;
 
     try {
-        let curso = await Course.findOne({ id });
+        let curso = await contentService.cargarCursoCompleto(id, { soloPublicado: true });
 
         if (!curso && staticCursos[id]) {
             curso = { id, ...staticCursos[id], modulos: [], recursosGlobales: [] };

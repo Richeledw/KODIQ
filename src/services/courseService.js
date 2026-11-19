@@ -9,65 +9,40 @@ const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
 const StudentProject = require('../models/StudentProject');
 const User = require('../models/User');
+const contentService = require('./contentService');
+const mediaService = require('./mediaService');
 
 /**
- * Agrega un nuevo módulo a un curso.
+ * Agrega un nuevo módulo a un curso (colección `Module`).
  * @param {string} cursoSlug Identificador id del curso.
  * @param {object} param1 { titulo, descripcion }
  */
 async function agregarModulo(cursoSlug, { titulo, descripcion }) {
-    const curso = await Course.findOne({ id: cursoSlug });
-    if (!curso) throw new Error('Curso no encontrado');
-
-    const orden = (curso.modulos ? curso.modulos.length : 0) + 1;
-    curso.modulos.push({
-        titulo: String(titulo).trim(),
-        descripcion: descripcion ? String(descripcion).trim() : '',
-        orden,
-        lecciones: [],
-        quiz: []
-    });
-
-    await curso.save();
-    return curso;
+    await contentService.crearModulo(cursoSlug, { titulo, descripcion });
+    return contentService.cargarCursoCompleto(cursoSlug);
 }
 
 /**
  * Agrega una lección a un módulo específico (buscado por _id o índice).
+ * Los campos clásicos del formulario (videoUrl, explicacionDetallada, codigoEjemplo)
+ * se convierten en bloques de contenido. También acepta `bloques` directamente.
  * @param {string} cursoSlug
  * @param {string} moduloId Identificador _id o índice del módulo.
  * @param {object} leccionData
  */
 async function agregarLeccion(cursoSlug, moduloId, leccionData) {
-    const curso = await Course.findOne({ id: cursoSlug });
-    if (!curso) throw new Error('Curso no encontrado');
-
-    let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
-    if (!modulo && /^\d+$/.test(String(moduloId))) {
-        modulo = curso.modulos[Number(moduloId)];
-    }
-    if (!modulo) throw new Error('Módulo no encontrado');
-
-    if (!Array.isArray(modulo.lecciones)) {
-        modulo.lecciones = [];
-    }
-
-    const orden = modulo.lecciones.length + 1;
-    const { titulo, duracion, videoUrl, explicacionDetallada, codigoEjemplo, lenguajeCodigo } = leccionData;
-
-    modulo.lecciones.push({
-        id: `${cursoSlug}-m${modulo.orden || 1}-l${orden}`,
-        titulo: String(titulo).trim(),
-        duracion: duracion ? String(duracion).trim() : '15 min',
-        videoUrl: videoUrl ? String(videoUrl).trim() : '',
-        explicacionDetallada: explicacionDetallada ? String(explicacionDetallada).trim() : '',
-        codigoEjemplo: codigoEjemplo || '',
-        lenguajeCodigo: lenguajeCodigo || 'javascript',
-        orden
+    const { titulo, duracion, videoUrl, explicacionDetallada, codigoEjemplo, lenguajeCodigo, bloques } =
+        leccionData || {};
+    await contentService.crearLeccion(cursoSlug, moduloId, {
+        titulo,
+        duracion,
+        videoUrl,
+        explicacionDetallada,
+        codigoEjemplo,
+        lenguajeCodigo,
+        bloques
     });
-
-    await curso.save();
-    return curso;
+    return contentService.cargarCursoCompleto(cursoSlug);
 }
 
 /**
@@ -77,26 +52,8 @@ async function agregarLeccion(cursoSlug, moduloId, leccionData) {
  * @param {string} leccionId
  */
 async function eliminarLeccion(cursoSlug, moduloId, leccionId) {
-    const curso = await Course.findOne({ id: cursoSlug });
-    if (!curso) throw new Error('Curso no encontrado');
-
-    let modulo = curso.modulos.find((m) => String(m._id) === String(moduloId));
-    if (!modulo && /^\d+$/.test(String(moduloId))) {
-        modulo = curso.modulos[Number(moduloId)];
-    }
-    if (!modulo || !Array.isArray(modulo.lecciones)) throw new Error('Módulo no encontrado');
-
-    let indice = modulo.lecciones.findIndex(
-        (l) => String(l._id) === String(leccionId) || String(l.id) === String(leccionId)
-    );
-    if (indice === -1 && /^\d+$/.test(String(leccionId))) {
-        indice = Number(leccionId);
-    }
-    if (indice === -1 || !modulo.lecciones[indice]) throw new Error('Lección no encontrada');
-
-    modulo.lecciones.splice(indice, 1);
-    await curso.save();
-    return curso;
+    await contentService.eliminarLeccion(cursoSlug, moduloId, leccionId);
+    return contentService.cargarCursoCompleto(cursoSlug);
 }
 
 /**
@@ -153,7 +110,9 @@ async function eliminarCursoCompleto(cursoSlug) {
     await Promise.all([
         Enrollment.deleteMany({ cursoId: slug }),
         StudentProject.deleteMany({ cursoId: slug }),
-        User.updateMany({ cursosInscritos: slug }, { $pull: { cursosInscritos: slug } })
+        User.updateMany({ cursosInscritos: slug }, { $pull: { cursosInscritos: slug } }),
+        contentService.eliminarContenidoDeCurso(cursoEliminado._id),
+        mediaService.eliminarAssetsDeCurso(cursoEliminado._id)
     ]);
 
     return cursoEliminado;

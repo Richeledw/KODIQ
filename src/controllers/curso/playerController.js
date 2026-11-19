@@ -8,13 +8,14 @@ const Course = require('../../models/Course');
 const User = require('../../models/User');
 const StudentProject = require('../../models/StudentProject');
 const progressService = require('../../services/progressService');
+const contentService = require('../../services/contentService');
 const logger = require('../../utils/logger');
 
 exports.getAulaVirtual = async (req, res) => {
     const { id, leccionId } = req.params;
 
     try {
-        const curso = await Course.findOne({ id });
+        const curso = await contentService.cargarCursoCompleto(id);
         if (!curso) {
             req.flash('error_msg', 'Curso no encontrado.');
             return res.redirect('/temas');
@@ -56,6 +57,12 @@ exports.getAulaVirtual = async (req, res) => {
             );
             if (index > 0) leccionAnterior = todasLasLecciones[index - 1];
             if (index < todasLasLecciones.length - 1) leccionSiguiente = todasLasLecciones[index + 1];
+
+            // Cargar los bloques completos únicamente de la lección activa
+            const leccionCompleta = await contentService.cargarLeccion(curso, leccionActiva.id || leccionActiva._id);
+            if (leccionCompleta) {
+                leccionActiva = leccionCompleta;
+            }
         }
 
         let proyecto = await StudentProject.findOne({ estudiante: user._id, cursoId: id });
@@ -105,7 +112,7 @@ exports.postCompletarLeccion = async (req, res) => {
     const esperaJson = Boolean(req.xhr || req.headers.accept?.includes('json'));
 
     try {
-        const curso = await Course.findOne({ id });
+        const curso = await contentService.cargarCursoCompleto(id);
         if (!curso) {
             if (esperaJson) return res.status(404).json({ success: false, msg: 'Curso no encontrado' });
             req.flash('error_msg', 'Curso no encontrado.');
@@ -140,7 +147,9 @@ exports.postCompletarLeccion = async (req, res) => {
         const yaCompletada = completadas.includes(clave);
         const nuevas = yaCompletada ? completadas.filter((c) => c !== clave) : [...completadas, clave];
 
-        const resultado = await progressService.guardarProgreso(req.user.id, curso, nuevas);
+        const resultado = await progressService.guardarProgreso(req.user.id, curso, nuevas, {
+            ultimaLeccionId: clave
+        });
 
         if (esperaJson) {
             return res.json({
@@ -238,7 +247,7 @@ exports.postGuardarProyecto = async (req, res) => {
 exports.getCertificado = async (req, res) => {
     try {
         const { id } = req.params;
-        const curso = await Course.findOne({ id });
+        const curso = await contentService.cargarCursoCompleto(id);
 
         if (!curso) {
             req.flash('error_msg', 'Curso no encontrado.');
@@ -298,7 +307,7 @@ exports.postEvaluarQuiz = async (req, res) => {
         const { id, moduloId } = req.params;
         const { respuestas } = req.body;
 
-        const curso = await Course.findOne({ id });
+        const curso = await contentService.cargarCursoCompleto(id);
         if (!curso || !Array.isArray(curso.modulos) || curso.modulos.length === 0) {
             return res.status(404).json({ success: false, msg: 'Módulo no encontrado.' });
         }
@@ -366,6 +375,18 @@ exports.postEvaluarQuiz = async (req, res) => {
         const porcentaje = Math.round((correctas / total) * 100);
         const aprobado = porcentaje >= 70;
 
+        if (req.user && req.user.id) {
+            const respuestasNumericas = Array.isArray(respuestas)
+                ? respuestas.map((r) => parseInt(r, 10)).filter((n) => !Number.isNaN(n))
+                : [];
+            await progressService.registrarIntentoQuiz(req.user.id, curso, {
+                moduloId: String(modulo._id || moduloId),
+                puntaje: porcentaje,
+                aprobado,
+                respuestas: respuestasNumericas
+            });
+        }
+
         return res.json({
             success: true,
             porcentaje,
@@ -378,5 +399,98 @@ exports.postEvaluarQuiz = async (req, res) => {
     } catch (err) {
         logger.error({ err }, 'Error al evaluar quiz');
         return res.status(500).json({ success: false, msg: 'Error interno al evaluar el cuestionario.' });
+    }
+};
+
+exports.postGuardarProgresoVideo = async (req, res) => {
+    try {
+        const { id, leccionId } = req.params;
+        const { bloqueId, segundoActual, duracionSeg, completado } = req.body;
+
+        const curso = await Course.findOne({ id });
+        if (!curso) {
+            return res.status(404).json({ success: false, msg: 'Curso no encontrado.' });
+        }
+
+        const registro = await progressService.guardarPosicionVideo(req.user.id, curso, {
+            leccionId,
+            bloqueId: bloqueId || 'principal',
+            segundoActual,
+            duracionSeg,
+            completado
+        });
+
+        if (!registro) {
+            return res.status(403).json({ success: false, msg: 'No estás inscrito en este curso.' });
+        }
+
+        return res.json({ success: true, progresoVideo: registro });
+    } catch (err) {
+        logger.error({ err }, 'Error al guardar progreso de video');
+        return res.status(500).json({ success: false, msg: 'Error interno al guardar progreso de video.' });
+    }
+};
+
+exports.postEvaluarQuizBloque = async (req, res) => {
+    try {
+        const { id, leccionId, bloqueId } = req.params;
+        const { respuestas } = req.body;
+
+        const curso = await Course.findOne({ id });
+        if (!curso) {
+            return res.status(404).json({ success: false, msg: 'Curso no encontrado.' });
+        }
+
+        const leccion = await contentService.cargarLeccion(curso, leccionId);
+        if (!leccion) {
+            return res.status(404).json({ success: false, msg: 'Lección no encontrada.' });
+        }
+
+        const bloque = (leccion.bloques || []).find((b) => b.tipo === 'quiz' && String(b._id) === String(bloqueId));
+        if (!bloque || !Array.isArray(bloque.preguntas) || bloque.preguntas.length === 0) {
+            return res.status(404).json({ success: false, msg: 'Quiz de lección no encontrado.' });
+        }
+
+        let correctas = 0;
+        const total = bloque.preguntas.length;
+        const detalles = [];
+        const respuestasNumericas = [];
+
+        bloque.preguntas.forEach((item, index) => {
+            const respUsuario = respuestas ? parseInt(respuestas[index], 10) : -1;
+            if (!Number.isNaN(respUsuario)) respuestasNumericas.push(respUsuario);
+            const esCorrecta = respUsuario === item.respuestaCorrecta;
+            if (esCorrecta) correctas++;
+            detalles.push({
+                preguntaIndex: index,
+                esCorrecta,
+                explicacion: item.explicacion || ''
+            });
+        });
+
+        const porcentaje = Math.round((correctas / total) * 100);
+        const minimo = typeof bloque.puntajeMinimo === 'number' ? bloque.puntajeMinimo : 70;
+        const aprobado = porcentaje >= minimo;
+
+        const registroQuiz = await progressService.registrarIntentoQuiz(req.user.id, curso, {
+            moduloId: String(leccion.moduloId || leccion.modulo || ''),
+            leccionId: leccion.id,
+            bloqueId: String(bloque._id),
+            puntaje: porcentaje,
+            aprobado,
+            respuestas: respuestasNumericas
+        });
+
+        return res.json({
+            success: true,
+            porcentaje,
+            aprobado,
+            mejorPuntaje: registroQuiz ? registroQuiz.mejorPuntaje : porcentaje,
+            intentos: registroQuiz ? registroQuiz.intentos : 1,
+            detalles
+        });
+    } catch (err) {
+        logger.error({ err }, 'Error al evaluar quiz de bloque');
+        return res.status(500).json({ success: false, msg: 'Error interno al evaluar el cuestionario de la lección.' });
     }
 };

@@ -1,105 +1,20 @@
 /**
  * @file Course.js
  * @description Modelo de Mongoose para cursos en la plataforma EduPlat.
- * Incluye soporte para módulos, lecciones con videos y explicaciones extendidas,
- * recursos descargables (PDFs, repositorios, guías) y consigna del proyecto práctico.
+ *
+ * Desde la v2 del esquema de contenido, los módulos y lecciones NO se guardan
+ * embebidos en el curso, sino en sus propias colecciones:
+ *
+ *   Course 1 ── N Module 1 ── N Lesson ── N bloques (texto, video, código, archivo...)
+ *                                  └── referencias a MediaAsset (archivos en GridFS)
+ *
+ * El curso conserva solo la ficha, la consigna del proyecto, los recursos globales y
+ * unas estadísticas desnormalizadas (`estadisticas`) para el catálogo.
+ * Usa `contentService.cargarCursoCompleto()` para obtener el curso con su temario.
  */
 
 const mongoose = require('mongoose');
-
-const ResourceSchema = new mongoose.Schema({
-    titulo: {
-        type: String,
-        required: [true, 'El título del recurso es obligatorio']
-    },
-    tipo: {
-        type: String,
-        enum: ['pdf', 'link', 'github', 'zip', 'guia', 'archivo'],
-        default: 'link'
-    },
-    url: {
-        type: String,
-        required: [true, 'La URL o ruta del recurso es obligatoria']
-    },
-    descripcion: {
-        type: String,
-        default: ''
-    }
-});
-
-const LessonSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: true
-    },
-    titulo: {
-        type: String,
-        required: [true, 'El título de la lección es obligatorio']
-    },
-    duracion: {
-        type: String,
-        default: '15 min'
-    },
-    videoUrl: {
-        type: String,
-        default: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    explicacionDetallada: {
-        type: String,
-        default: ''
-    },
-    codigoEjemplo: {
-        type: String,
-        default: ''
-    },
-    lenguajeCodigo: {
-        type: String,
-        default: 'javascript'
-    },
-    recursos: [ResourceSchema],
-    orden: {
-        type: Number,
-        default: 1
-    }
-});
-
-const QuizQuestionSchema = new mongoose.Schema({
-    pregunta: {
-        type: String,
-        required: true
-    },
-    opciones: [
-        {
-            type: String,
-            required: true
-        }
-    ],
-    respuestaCorrecta: {
-        type: Number,
-        required: true
-    },
-    explicacion: {
-        type: String,
-        default: ''
-    }
-});
-
-const ModuleSchema = new mongoose.Schema({
-    titulo: {
-        type: String,
-        required: [true, 'El título del módulo es obligatorio']
-    },
-    descripcion: {
-        type: String,
-        default: ''
-    },
-    orden: {
-        type: Number,
-        default: 1
-    },
-    lecciones: [LessonSchema],
-    quiz: [QuizQuestionSchema]
-});
+const { ResourceSchema } = require('./schemas/Resource');
 
 const CourseSchema = new mongoose.Schema({
     id: {
@@ -185,20 +100,59 @@ const CourseSchema = new mongoose.Schema({
             }
         ]
     },
-    // Módulos y lecciones
-    modulos: [ModuleSchema],
     // Recursos globales adicionales del curso
     recursosGlobales: [ResourceSchema],
+    // Portada opcional subida a GridFS
+    portada: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MediaAsset'
+    },
+    // Contadores desnormalizados; los mantiene contentService.recalcularEstadisticas()
+    estadisticas: {
+        modulos: { type: Number, default: 0 },
+        lecciones: { type: Number, default: 0 },
+        minutos: { type: Number, default: 0 },
+        archivos: { type: Number, default: 0 }
+    },
+    // Versión del esquema de contenido (2 = módulos/lecciones en colecciones propias)
+    versionContenido: {
+        type: Number,
+        default: 2
+    },
     creadoEn: {
         type: Date,
         default: Date.now
     }
 });
 
-// Helper virtual para contar total de lecciones
+CourseSchema.index({ publicado: 1, creadoEn: -1 });
+CourseSchema.index({ categoria: 1, publicado: 1 });
+CourseSchema.index({ autor: 1 });
+
+// Total de lecciones (lectura rápida desde las estadísticas desnormalizadas)
 CourseSchema.virtual('totalLecciones').get(function () {
-    if (!this.modulos || this.modulos.length === 0) return 0;
-    return this.modulos.reduce((acc, m) => acc + (m.lecciones ? m.lecciones.length : 0), 0);
+    return (this.estadisticas && this.estadisticas.lecciones) || 0;
+});
+
+// Compatibilidad transparente: si algún llamador pasa `modulos` al crear un Course
+// (ej. Course.create({ ..., modulos: [...] })), no se guarda embebido en el documento
+// del curso, sino que se importa automáticamente a las colecciones Module y Lesson.
+CourseSchema.virtual('modulos')
+    .get(function () {
+        return (this.$locals && (this.$locals.modulosCargados || this.$locals.modulosPendientes)) || [];
+    })
+    .set(function (valor) {
+        this.$locals = this.$locals || {};
+        this.$locals.modulosPendientes = Array.isArray(valor) ? valor : [];
+    });
+
+CourseSchema.post('save', async function (doc) {
+    const pendientes = this.$locals && this.$locals.modulosPendientes;
+    if (Array.isArray(pendientes) && pendientes.length > 0) {
+        this.$locals.modulosPendientes = null;
+        const contentService = require('../services/contentService');
+        await contentService.importarModulos(doc, pendientes);
+    }
 });
 
 module.exports = mongoose.model('Course', CourseSchema);

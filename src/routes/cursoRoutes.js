@@ -40,4 +40,14 @@ router.get('/curso/:id/certificado', isAuth, cursoController.getCertificado);
 // Evaluación interactiva de quiz por módulo
 router.post('/curso/:id/modulo/:moduloId/quiz/evaluar', isAuth, cursoController.postEvaluarQuiz);
 
+// Guardar segundo exacto de reproducción de video en una lección
+router.post('/curso/:id/leccion/:leccionId/video-progreso', isAuth, cursoController.postGuardarProgresoVideo);
+
+// Evaluar quiz intercalado en un bloque de una lección
+router.post(
+    '/curso/:id/leccion/:leccionId/bloque/:bloqueId/quiz/evaluar',
+    isAuth,
+    cursoController.postEvaluarQuizBloque
+);
+
 module.exports = router;

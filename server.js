@@ -164,6 +164,7 @@ const panelRoutes = require('./src/routes/panelRoutes');
 const cursoRoutes = require('./src/routes/cursoRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const docenteRoutes = require('./src/routes/docenteRoutes');
+const mediaRoutes = require('./src/routes/mediaRoutes');
 
 app.use('/', indexRoutes);
 app.use('/', authRoutes);
@@ -171,6 +172,7 @@ app.use('/', panelRoutes);
 app.use('/', cursoRoutes);
 app.use('/', adminRoutes);
 app.use('/', docenteRoutes);
+app.use('/', mediaRoutes);
 
 // Gestión de 404 (Not Found)
 app.use((req, res) => {

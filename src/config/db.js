@@ -32,6 +32,13 @@ const connectDB = async () => {
         // Sembrar cursos por defecto si la base de datos es nueva
         const { seedCoursesIfNeeded } = require('../utils/seedCourses');
         await seedCoursesIfNeeded();
+
+        // Migrar contenido embebido (esquema v1) a colecciones Module/Lesson (v2). Idempotente.
+        const { migrarContenidoPendiente } = require('../services/contentMigration');
+        const migracion = await migrarContenidoPendiente({ log: (m) => console.log(`[migración contenido] ${m}`) });
+        if (migracion.errores.length > 0) {
+            console.error(`[migración contenido] ${migracion.errores.length} curso(s) con errores.`);
+        }
     } catch (error) {
         // En caso de error, se imprime en consola y se aborta el inicio del servidor
         console.error(`Error de conexión a MongoDB: ${error.message}`);

@@ -8,13 +8,16 @@ const Course = require('../models/Course');
 const StudentProject = require('../models/StudentProject');
 const Enrollment = require('../models/Enrollment');
 const courseService = require('../services/courseService');
+const contentService = require('../services/contentService');
 const logger = require('../utils/logger');
 
 exports.getDashboard = async (req, res) => {
     try {
         const userId = req.user._id;
         const filtro = req.user.rol === 'admin' ? {} : { autor: userId };
-        const misCursos = await Course.find(filtro).sort({ creadoEn: -1 });
+        const misCursosDocs = await Course.find(filtro).sort({ creadoEn: -1 });
+        const temarios = await contentService.cargarTemarios(misCursosDocs);
+        const misCursos = misCursosDocs.map((c) => temarios.get(c.id) || c);
 
         const cursoIds = misCursos.map((c) => c.id);
 
@@ -236,7 +239,7 @@ exports.eliminarCurso = async (req, res) => {
 exports.getContenidoCurso = async (req, res) => {
     try {
         const { id } = req.params;
-        const curso = await Course.findOne({ id });
+        const curso = await contentService.cargarCursoCompleto(id, { incluirBloques: true });
 
         if (!curso) {
             req.flash('error_msg', 'Curso no encontrado.');
